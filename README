@@ -1,0 +1,10 @@
+Welcome!
+========
+
+FrontCompiler is a simple collection of compactors for the JavaScript
+and CSS source code. It removes trailing whitespaces, comments and
+transformates the local variables to make them shorter.
+
+
+The code released under terms of the MIT License
+Copyright (C) 2008 Nikolay V. Nemshilov
