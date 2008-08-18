@@ -8,33 +8,42 @@ class FrontCompiler
   attr_reader :js
   
   def initialize
-    @js = JSCompactor.new
+    @js_compactor = JSCompactor.new
   end
   
-  def compact_dir(dir)
-  end
-  
+  # compacts all the files out of the list
+  # and returns them as a single string
   def compact_files(list)
+    list.collect do |file|
+      compact_file file
+    end.join("\n")
   end
   
+  # compacts the given file (path or a File object)
   def compact_file(file)
-    file = File.open(file) if file.is_a?(String)
+    file = File.open(file, 'r') if file.is_a?(String)
     
-    
-    y file.name
-    compact_js file.read
+    case file.path.split('.').last.downcase
+      when 'js'   then compact_js   file.read
+      when 'css'  then compact_css  file.read
+      when 'html' then compact_html file.read
+      else                          file.read
+    end
   end
   
+  # compacts a JavaScript source code
   def compact_js(source)
-    @js.minimize(source)
+    @js_compactor.minimize(source)
   end
   
+  # compacts a CSS source code
   def compact_css(source)
     source
   end
   
+  # compacts a HTML code
   def compact_html(source)
-    
+    source
   end
   
   #
@@ -43,10 +52,10 @@ class FrontCompiler
   class JSCompactor
     # applies all the compactings to the source
     def minimize(source)
-      source = @js.remove_comments(source)
-      source = @js.convert_one_line_cnstructions(source)
-      source = @js.remove_empty_lines(source)
-      source = @js.remove_trailing_spaces(source)
+      source = remove_comments(source)
+      source = convert_one_line_cnstructions(source)
+      source = remove_empty_lines(source)
+      source = remove_trailing_spaces(source)
       
       source.trim
     end
@@ -132,16 +141,13 @@ class FrontCompiler
         body = ''
       end
       
-      body = "{#{body}}" unless body =~ /\A\s*\{/
+      body = "{#{body}}" unless body =~ /\A\s*\{/ # filters out doublequoting
       
       ["#{conditions}#{body}", stack]
     end
     
-    BLOCK_CHUNKS = { 
-      "(" => ")",
-      "{" => "}",
-      "[" => "]"
-    }
+    BLOCK_CHUNKS = { "(" => ")", "{" => "}", "[" => "]" }
+    
     # searches for a block in the stack
     def find_block(stack, left="(")
       right = BLOCK_CHUNKS[left]
