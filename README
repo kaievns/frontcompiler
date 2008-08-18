@@ -1,9 +1,36 @@
 Welcome!
 ========
 
-FrontCompiler is a simple collection of compactors for the JavaScript
-and CSS source code. It removes trailing whitespaces, comments and
-transformates the local variables to make them shorter.
+FrontCompiler is a simple collection of compactors for the JavaScript,
+CSS and HTML source code. It removes trailing whitespaces, comments and
+transformates the local variables to make the sourcecode shorter.
+
+Usage
+=====
+
+It's pretty simple
+
+@c = FrontCompiler.new
+
+@compact_js = @c.compact_js(File.open('src/something.js', 'r'));
+@compact_css = @c.compact_css(File.open('src/something.css', 'r'));
+@compact_html = @c.compact_css(File.open('src/something.css', 'r'));
+
+or shorter
+
+@compact_js = @c.compact_file('src/something.js');
+@compact_css = @c.compact_file('src/something.css');
+@compact_html = @c.compact_file('src/something.css');
+
+or you can compact several files at once like that
+
+@library_code = @c.compact_files(%w{
+  src/lib.js
+  src/lib/something.js
+  src/lib/another.js
+})
+
+Same for the other file-types
 
 
 The code released under terms of the MIT License
