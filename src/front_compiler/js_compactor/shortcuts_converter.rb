@@ -15,6 +15,8 @@
 # Copyright (C) Nikolay V. Nemshilov aka St.
 #
 class FrontCompiler::JSCompactor::ShortcutsConverter
+  extend FrontCompiler::JSCompactor::Util
+  
   class << self
     # converts shortcuts in the string
     def convert(str)
@@ -74,11 +76,6 @@ class FrontCompiler::JSCompactor::ShortcutsConverter
       body = "{#{body}}" unless body =~ /\A\s*\{/ # filters out doublequoting
       
       ["#{conditions}#{body}", stack]
-    end
-    
-    # searches for a block in the stack
-    def find_block(*args)
-      FrontCompiler::JSCompactor.find_block(*args)
     end
   end
 end
