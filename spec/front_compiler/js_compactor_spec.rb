@@ -89,4 +89,51 @@ describe FrontCompiler::JSCompactor do
         {while (something()) { return true; }}
     }
   end
+  
+  it "should compact local variable names" do 
+    src = %{
+      var something = function(bla, foo) { 
+        var doo, hoo = 1;
+        var moo = function(boo, foo, hoo) {
+          var hoo = hoo || foo, boo = foo.something(hoo, asdf());
+          foo = hoo * boo / foo;
+
+          function moo(moo) {
+            doo(hoo);
+
+            foo_bla(hoo_moo(boo_doo))
+            
+            function zoo(ioo) {
+              if (boo) { }
+              for (var i=0; i < hoo.length; i++) hoo.bla();
+            }
+          }
+
+          return moo(foo);
+        }
+      }
+    }
+    @c.compact_local_names(src).should == %{
+      var something = function(d, g) { 
+        var e, j = 1;
+        var k = function(b, f, h) {
+          var h = h || f, b = f.something(h, asdf());
+          f = h * b / f;
+
+          function c(m) {
+            e(h);
+
+            foo_bla(hoo_moo(boo_doo))
+            
+            function z(a) {
+              if (b) { }
+              for (var i=0; i < h.length; i++) h.bla();
+            }
+          }
+
+          return c(f);
+        }
+      }
+    }
+  end
 end

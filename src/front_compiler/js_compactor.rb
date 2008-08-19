@@ -8,10 +8,11 @@ class FrontCompiler::JSCompactor
   def minimize(source)
     source = remove_comments(source)
     source = convert_one_line_constructions(source)
+    source = compact_local_names(source)
     source = remove_empty_lines(source)
     source = remove_trailing_spaces(source)
     
-    source.trim
+    source.strip
   end
   
   # removes all the comments out of the source code
