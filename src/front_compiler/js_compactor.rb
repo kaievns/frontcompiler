@@ -74,4 +74,28 @@ protected
     
     src
   end
+  
+  class << self
+    # searches for a block in the stack
+    def find_block(stack, left="(")
+      @@BLOCK_CHUNKS ||= { "(" => ")", "{" => "}", "[" => "]" }
+      right = @@BLOCK_CHUNKS[left]
+      block = stack[/\A\s*#{Regexp.escape(left)}/im]
+      stack = stack[block.size, stack.size].split('')
+      
+      count = 0
+      while char = stack.shift
+        block << char
+        
+        if char == right and count == 0
+          break
+        else
+          count += 1 if char == left
+          count -= 1 if char == right
+        end
+      end
+      
+      block
+    end
+  end
 end
