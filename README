@@ -5,6 +5,8 @@ FrontCompiler is a simple collection of compactors for the JavaScript,
 CSS and HTML source code. It removes trailing whitespaces, comments and
 transformates the local variables to make the sourcecode shorter.
 
+The library can be used as a plugin for rails.
+
 NOTE: the project is still in development, not everything works yet.
 
 
