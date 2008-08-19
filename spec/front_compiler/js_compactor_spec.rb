@@ -45,7 +45,7 @@ describe FrontCompiler::JSCompactor do
         if (smth(asdf, asdf)) {
           for (var i = 0; i < asdf.length; i++) { 
             while (asdf && asdf) {
-              do_something(weird);
+              do_something(weird) 
               var str1 = "asdf      sdf(    ) { asdfasdf }";
               var str2 = "sdfsdfsdf if (asdf) { asdf }";
             }
@@ -137,5 +137,36 @@ describe FrontCompiler::JSCompactor do
         }
       }
     }
+  end
+  
+  it "should apply all the compactions in the minimize method" do 
+    src = %{
+      /**
+       * some comment
+       */
+      var something = function(bla, foo) { 
+        var str = "function(asdf, boo) { asdf(); boo; }"
+        var doo, hoo = 1;
+        var moo = function(boo, foo, hoo) {
+          var hoo = hoo || foo, boo = foo.something(hoo, asdf());
+          foo = hoo * boo / foo;
+
+          function moo(moo) {
+            doo(hoo);
+
+            foo_bla(hoo_moo(boo_doo))
+            
+            function zoo(ioo) {
+              if (boo) { }
+              for (var i=0; i < hoo.length; i++) hoo.bla();
+            }
+          }
+
+          return moo(foo);
+        }
+      }
+    }
+    
+    @c.minimize(src).should == %{var something=function(d,g){var s="function(asdf, boo) { asdf(); boo; }";var e,j=1;var k=function(b,f,h){var h=h||f,b=f.something(h,asdf());f=h*b/f;function c(m){e(h);foo_bla(hoo_moo(boo_doo));function z(a){if(b){}for(var i=0;i<h.length;i++){h.bla();}}}return c(f);}}}
   end
 end

@@ -34,7 +34,8 @@ class FrontCompiler::JSCompactor
   # removes all the trailing spaces out of the code
   def remove_trailing_spaces(source)
     for_outstrings_of(source) do |str|
-      str.gsub /\s*(=|\+|\-|<|>|\?|\|\||&&|\!|\{|\}|,|\)|\(|;|\]|\[|:|\*)\s*/im, '\1'
+      str.gsub! /([\]\)\w\d_"'])(\s*?\n)/, '\1;\2'
+      str.gsub /\s*(=|\+|\-|<|>|\?|\|\||&&|\!|\{|\}|,|\)|\(|;|\]|\[|:|\*|\/)\s*/im, '\1'
     end
   end
   
@@ -46,6 +47,7 @@ class FrontCompiler::JSCompactor
     end
   end
   
+  # compacts the local names of the functions in the source code
   def compact_local_names(source)
     for_outstrings_of(source) do |str|
       NamesCompactor.compact str
