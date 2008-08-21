@@ -58,8 +58,11 @@ end
 Now you have a single javascript file which contains both, javascript
 and the application stylesheets in one.
 
+NOTE: if the user have JavaScript switched off, then he won't see the
+styles.
+
 Enjoy!
 
 --
 The code released under terms of the MIT License
-Copyright (C) 2008 Nikolay V. Nemshilov
+Copyright (C) 2008 Nikolay V. Nemshilov aka St.
