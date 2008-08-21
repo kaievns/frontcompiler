@@ -97,3 +97,8 @@ protected
     str
   end
 end
+
+require "front_compiler/js_compactor/util"
+require "front_compiler/js_compactor/names_compactor"
+require "front_compiler/js_compactor/shortcuts_converter"
+

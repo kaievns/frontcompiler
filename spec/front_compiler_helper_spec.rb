@@ -1,5 +1,4 @@
 require File.dirname(__FILE__)+"/spec_helper"
-require File.dirname(__FILE__)+"/../lib/front_compiler_helper"
 
 describe FrontCompilerHelper do
   include FrontCompilerHelper

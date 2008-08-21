@@ -5,11 +5,6 @@
 #
 $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__))).uniq!
 
-require "front_compiler/js_compactor"
-require "front_compiler/css_compactor"
-require "front_compiler/html_compactor"
-require "front_compiler/rails_controller_helper"
-
 class FrontCompiler
   def initialize
     @js_compactor = JSCompactor.new
@@ -57,3 +52,8 @@ class FrontCompiler
     @css_compactor.to_javascript(source)
   end
 end
+
+require "front_compiler/js_compactor"
+require "front_compiler/css_compactor"
+require "front_compiler/html_compactor"
+require "front_compiler/rails_controller_helper"
