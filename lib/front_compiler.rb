@@ -6,6 +6,8 @@
 $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__))).uniq!
 
 class FrontCompiler
+  VERSION = "0.1"
+  
   def initialize
     @js_compactor = JSCompactor.new
     @css_compactor = CSSCompactor.new
