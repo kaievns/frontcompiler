@@ -32,20 +32,20 @@ class NamesCompactor
     
   protected
     def function_start_re
-      @@function_start_re ||= /[\s\(:;=\{^$]+function[\w\d\s_]*\(/im
+      @@function_start_re ||= /[\s\(:;=\{^$]+function[\w\d\s_\$]*\(/im
     end
     
     # compacts the localnames of the function
     def compact_names(arguments, body)
       names = guess_names_map(body,
-                arguments.scan(/[\w\d_]+/im).concat(
-                  find_body_varnames(body)
-                ).uniq.select{ |name| name.size > 1 }.sort)
+                find_body_varnames(body).select{ |n| n.size > 1
+                }.concat(arguments.scan(/[\w\d_\$]+/im)
+                ).uniq.sort.select{ |n| n != '$super' })
       
       names.each do |name, replacement|
         [arguments, body].each do |str|
-          str.gsub!(/([^\w\d_\.])#{name}([^\w\d_:])/) do |match|
-            $1 + replacement + $2
+          str.gsub!(/([^\w\d_\.\$])#{name}(?![\w\d_:\$])/) do |match|
+            $1 + replacement
           end
         end
       end
@@ -58,9 +58,11 @@ class NamesCompactor
       names_map = { }
       used_renames = []
       
+      @replacements ||= [name[/a-z/i]||'a'].concat(('a'..'z').to_a.concat(('A'...'Z').to_a))
+      
       names.each do |name|
-        ('a'..'z').to_a.concat(('A'...'Z').to_a).unshift(name[/[a-z]/] || 'a').each do |rename|
-          if !used_renames.include?(rename) and !body.match(/[^\w\d_\.]#{rename}[^\w\d_]/)
+        @replacements.each do |rename|
+          if !used_renames.include?(rename) and !body.match(/[^\w\d_\.\$]#{rename}[^\w\d_\$]/)
             names_map[name] = rename
             used_renames << rename
             break

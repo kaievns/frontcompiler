@@ -27,7 +27,7 @@ class FrontCompiler::JSCompactor::ShortcutsConverter
       end
       
       # convert the else's single line constructions
-      str = str.gsub /((\}|\s)else\s*)[^\{]+.*/im do |match|
+      str = str.gsub /((\}|\s)else\s+)(?!if)[^\{]+.*/im do |match|
         start = $1.dup
         stack = match.to_s[start.size, match.to_s.size]
         
@@ -61,6 +61,7 @@ class FrontCompiler::JSCompactor::ShortcutsConverter
         # find the end of the construction
         body = find_block(stack, "{")
         stack = stack[body.size, stack.size]
+        body = convert(body)
         
       elsif stack =~ /\A\s*(if|for|while)\s*\(/im
         # nesting
@@ -68,12 +69,26 @@ class FrontCompiler::JSCompactor::ShortcutsConverter
         
       elsif body = stack[/\A\s*.+?\n/im]
         body = body[0, body.size-1] # <- skip the last new line
-        stack = stack[body.size, stack.size]
+        
+        # handling some hacky definitions
+        if body =~ /\s*.*?\s*=\s*function\(.*?\)\s*\{/i
+          pos = body =~ /\{/
+          body = body[0, pos-1] + find_block(stack[pos-1, stack.size], "{")
+          stack = stack[body.size, stack.size]
+          
+          if semicolon = stack[/\A\s*;/]
+            body += semicolon
+            stack = stack[semicolon.size, stack.size]
+          end
+        else
+          stack = stack[body.size, stack.size]
+        end
       else
         body = ''
       end
       
-      body = "{#{body}}" unless body =~ /\A\s*\{/ # filters out doublequoting
+      # filters out doublequoting and empty bodies
+      body = "{#{body}}" unless body =~ /\A\s*\{/ or body =~ /\A\s*\Z/im
       
       ["#{conditions}#{body}", stack]
     end

@@ -45,15 +45,15 @@ describe FrontCompiler::JSCompactor do
         if (smth(asdf, asdf)) {
           for (var i = 0; i < asdf.length; i++) { 
             while (asdf && asdf) {
-              do_something(weird) 
+              do_something(weird);
               var str1 = "asdf      sdf(    ) { asdfasdf }";
               var str2 = "sdfsdfsdf if (asdf) { asdf }";
+              var type = typeof str2;
             }
           }
         }
       };
-    }).should == %{
-      var f=function(asdf,asdf){if(smth(asdf,asdf)){for(var i=0;i<asdf.length;i++){while(asdf&&asdf){do_something(weird);var str1="asdf      sdf(    ) { asdfasdf }";var str2="sdfsdfsdf if (asdf) { asdf }"}}}};}
+    }).should == %{ var f=function(asdf,asdf){if(smth(asdf,asdf)){for(var i=0;i<asdf.length;i++){while(asdf&&asdf){do_something(weird);var str1="asdf      sdf(    ) { asdfasdf }";var str2="sdfsdfsdf if (asdf) { asdf }";var type=typeof(str2)}}}};}
   end
   
   it "should convert the one-line constructions" do
@@ -72,6 +72,21 @@ describe FrontCompiler::JSCompactor do
         while (something()) { for (asdfasf;asdfa;asd) {  asdf; }}
       else
         while (something()) { return true; }
+
+      if (something) something = function(bla, bla) {
+        bla_bla(bla);
+      };
+
+      if (params = Object.toQueryString(params)) {
+        if (this.method == 'get')
+          this.url += (this.url.include('?') ? '&' : '?') + params;
+        else if (/Konqueror|Safari|KHTML/.test(navigator.userAgent))
+          params += '&_=';
+      }
+
+      if (this.transport.overrideMimeType &&
+          (navigator.userAgent.match(/Gecko\\/(\\d{4})/) || [0,2005])[1] < 2005)
+            headers['Connection'] = 'close';
     }).should == %{
       var str1 = "if (smth) smth;";
       
@@ -87,6 +102,21 @@ describe FrontCompiler::JSCompactor do
         while (something()) { for (asdfasf;asdfa;asd) {  asdf; }}}
       else
         {while (something()) { return true; }}
+
+      if (something){ something = function(bla, bla) {
+        bla_bla(bla);
+      };}
+
+      if (params = Object.toQueryString(params)) {
+        if (this.method == 'get'){
+          this.url += (this.url.include('?') ? '&' : '?') + params;}
+        else if (/Konqueror|Safari|KHTML/.test(navigator.userAgent)){
+          params += '&_=';}
+      }
+
+      if (this.transport.overrideMimeType &&
+          (navigator.userAgent.match(/Gecko\\/(\\d{4})/) || [0,2005])[1] < 2005){
+            headers['Connection'] = 'close';}
     }
   end
   
@@ -112,47 +142,63 @@ describe FrontCompiler::JSCompactor do
               if (boo) { }
               for (var i=0; i < hoo.length; i++) hoo.bla();
             }
+
+            var noo = function(item, i) {
+              i = i || item[i]
+            };
           }
 
           var obj = {foo: foo, boo: boo};
-
           var list = [foo, boo, hoo];
 
           return moo(foo);
         }
       }
+      var toggle = function(element, className) {
+        if (!(element = $(element))) return;
+        return element[element.hasClassName(className) ?
+          'removeClassName' : 'addClassName'](className);
+      };
     }
 
     @c.compact_local_names(src).should == %{
-      var something = function(d, g) { 
+      var something = function(n, p) { 
         var s = "function(asdf, boo) { asdf(); boo; }"
-        var e, j = 1;
-        var n = function(b, f, h) {
-          var h = h || f, b = f.something(h, asdf());
-          f = h * b / f;
+        var o, q = 1;
+        var r = function(f, g, h) {
+          var h = h || g, f = g.something(h, asdf());
+          g = h * f / g;
 
-          for (var k in f) {
-            b = f[k];
+          for (var j in g) {
+            f = g[j];
           }
 
-          function c(m) {
-            e(h);
+          function l(c) {
+            o(h);
 
             foo_bla(hoo_moo(boo_doo))
             
-            function z(a) {
-              if (b) { }
+            function e(a) {
+              if (f) { }
               for (var i=0; i < h.length; i++) h.bla();
             }
+
+            var d = function(b, a) {
+              a = a || b[a]
+            };
           }
 
-          var o = {foo: f, boo: b};
+          var m = {foo: g, boo: f};
+          var k = [g, f, h];
 
-          var l = [f, b, h];
-
-          return c(f);
+          return l(g);
         }
       }
+      var toggle = function(b, a) {
+        if (!(b = $(b))) return;
+        return b[b.hasClassName(a) ?
+          'removeClassName' : 'addClassName'](a);
+      };
     }
   end
   
@@ -162,7 +208,7 @@ describe FrontCompiler::JSCompactor do
        * some comment
        */
       var something = function(bla, foo) { 
-        var str = "function(asdf, boo) { asdf(); boo; }"
+        var str = "function(asdf, boo) { asdf(); boo; }";
         var doo, hoo = 1;
         var moo = function(boo, foo, hoo) {
           var hoo = hoo || foo, boo = foo.something(hoo, asdf());
@@ -171,7 +217,7 @@ describe FrontCompiler::JSCompactor do
           function moo(moo) {
             doo(hoo);
 
-            foo_bla(hoo_moo(boo_doo))
+            foo_bla(hoo_moo(boo_doo));
             
             function zoo(ioo) {
               if (boo) { }
@@ -184,7 +230,7 @@ describe FrontCompiler::JSCompactor do
       }
     }
     
-    @c.minimize(src).should == %{var something=function(d,g){var s="function(asdf, boo) { asdf(); boo; }";var e,j=1;var k=function(b,f,h){var h=h||f,b=f.something(h,asdf());f=h*b/f;function c(m){e(h);foo_bla(hoo_moo(boo_doo));function z(a){if(b){}for(var i=0;i<h.length;i++){h.bla()}}}return c(f)}}}
+    @c.minimize(src).should == %{var something=function(h,k){var n="function(asdf, boo) { asdf(); boo; }";var j,l=1;var m=function(d,e,f){var f=f||e,d=e.something(f,asdf());e=f*d/e;function g(b){j(f);foo_bla(hoo_moo(boo_doo));function c(a){if(d){}for(var i=0;i<f.length;i++)f.bla()}}return g(e)}}}
   end
   
   it "should escape strings and regexps properly" do 
