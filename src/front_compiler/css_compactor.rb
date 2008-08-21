@@ -10,6 +10,14 @@ class FrontCompiler::CSSCompactor
     source = remove_trailing_spaces(source)
   end
   
+  # converts the source in such a way that it could be
+  # delivered with javascript in the same file
+  def to_javascript(source)
+    "document.write(\"<style type=\\\"text/css\\\">#{
+       minimize(source).gsub('"', '\"')
+     }</style>\");"
+  end
+  
   # removes all the comments out of the given source
   def remove_comments(source)
     for_outstrings_of(source) do |str|
@@ -30,6 +38,7 @@ class FrontCompiler::CSSCompactor
     for_outstrings_of(source) do |str|
       str.gsub! /\s+/im, ' '
       str.gsub! /\s*(\+|>|\||~|\{|\}|,|\)|\(|;|:|\*)\s*/im, '\1'
+      str.gsub! /;\}/, '}'
       str.strip
     end
   end

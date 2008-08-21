@@ -81,6 +81,28 @@ describe FrontCompiler::CSSCompactor do
       form p label { 
         display: block;
       }
-    }).should == %{html,body{cusor:pointer;color:red;}div>p~label:after{content:'           ';text-decoration:underline;}form p label{display:block;}}
+    }).should == %{html,body{cusor:pointer;color:red}div>p~label:after{content:'           ';text-decoration:underline}form p label{display:block}}
+  end
+  
+  it "should apply all the minimizations to the code" do 
+    @c.minimize(%{ 
+      /* some comment */
+      div           ,
+      p {         padding: 10pt; }
+    }).should == %{div,p{padding:10pt}}
+  end
+  
+  it "should convert the stylesheet into a embedded javascript code" do 
+    @c.to_javascript(%{ 
+      /* some comment */
+      div           ,
+      p {         padding: 10pt; 
+        background: url('something');
+        content: "something";
+     }
+    }).should == 
+      'document.write("<style type=\\"text/css\\">'+
+        'div,p{padding:10pt;background:url(\'something\');content:\"something\"}'+
+      '</style>");'
   end
 end
