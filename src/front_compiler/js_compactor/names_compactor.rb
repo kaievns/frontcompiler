@@ -44,7 +44,7 @@ class NamesCompactor
       
       names.each do |name, replacement|
         [arguments, body].each do |str|
-          str.gsub!(/([^\w\d_\.])#{name}([^\w\d_])/) do |match|
+          str.gsub!(/([^\w\d_\.])#{name}([^\w\d_:])/) do |match|
             $1 + replacement + $2
           end
         end
@@ -114,9 +114,25 @@ class NamesCompactor
       
       # getting the vars definitions
       body.scan(/[\s\(:;=\{\[^$]+var\s(.*?)(;|$)/im) do |match|
-        names.concat($1.dup.split(",").collect{ |token|
-          token.split("=").first.strip
-        })
+        line = $1.dup
+        
+        # removing arrays and objects definitions out of the line
+        ['[', '{'].each do |tag|
+          while line =~ (tag=='[' ? /\[.*?\]/ : /\{.*?\}/)
+            pos = (line =~ (tag=='[' ? /\[/ : /\{/))
+            start = line[0, pos-1]
+            block = find_block(line[pos-1, line.size], tag)
+            
+            line = start + line[pos-1+block.size, line.size]
+          end
+        end
+        
+        
+        # removing objects definitions
+        
+        names.concat(line.split(",").collect{ |token|
+          token[/[\w\d_\$]+/i]
+        }.compact)
       end
       
       names

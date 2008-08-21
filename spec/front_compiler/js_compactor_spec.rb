@@ -28,13 +28,13 @@ describe FrontCompiler::JSCompactor do
   it "should remove all the empty lines" do 
     @c.remove_empty_lines(%{
       
-      var str1 = "asdfsdf \n\n\n asd";
+      var str1 = "asdfsdf \\n\\n\\n asd";
       var str2 = 'asdfasdf';
 
 
 
     }).should == %{
-      var str1 = "asdfsdf \n\n\n asd";
+      var str1 = "asdfsdf \\n\\n\\n asd";
       var str2 = 'asdfasdf';
     }
   end
@@ -53,7 +53,7 @@ describe FrontCompiler::JSCompactor do
         }
       };
     }).should == %{
-      var f=function(asdf,asdf){if(smth(asdf,asdf)){for(var i=0;i<asdf.length;i++){while(asdf&&asdf){do_something(weird);var str1="asdf      sdf(    ) { asdfasdf }";var str2="sdfsdfsdf if (asdf) { asdf }";}}}};}
+      var f=function(asdf,asdf){if(smth(asdf,asdf)){for(var i=0;i<asdf.length;i++){while(asdf&&asdf){do_something(weird);var str1="asdf      sdf(    ) { asdfasdf }";var str2="sdfsdfsdf if (asdf) { asdf }"}}}};}
   end
   
   it "should convert the one-line constructions" do
@@ -99,6 +99,10 @@ describe FrontCompiler::JSCompactor do
           var hoo = hoo || foo, boo = foo.something(hoo, asdf());
           foo = hoo * boo / foo;
 
+          for (var key in foo) {
+            boo = foo[key];
+          }
+
           function moo(moo) {
             doo(hoo);
 
@@ -110,17 +114,26 @@ describe FrontCompiler::JSCompactor do
             }
           }
 
+          var obj = {foo: foo, boo: boo};
+
+          var list = [foo, boo, hoo];
+
           return moo(foo);
         }
       }
     }
+
     @c.compact_local_names(src).should == %{
       var something = function(d, g) { 
         var s = "function(asdf, boo) { asdf(); boo; }"
         var e, j = 1;
-        var k = function(b, f, h) {
+        var n = function(b, f, h) {
           var h = h || f, b = f.something(h, asdf());
           f = h * b / f;
+
+          for (var k in f) {
+            b = f[k];
+          }
 
           function c(m) {
             e(h);
@@ -132,6 +145,10 @@ describe FrontCompiler::JSCompactor do
               for (var i=0; i < h.length; i++) h.bla();
             }
           }
+
+          var o = {foo: f, boo: b};
+
+          var l = [f, b, h];
 
           return c(f);
         }
@@ -167,6 +184,18 @@ describe FrontCompiler::JSCompactor do
       }
     }
     
-    @c.minimize(src).should == %{var something=function(d,g){var s="function(asdf, boo) { asdf(); boo; }";var e,j=1;var k=function(b,f,h){var h=h||f,b=f.something(h,asdf());f=h*b/f;function c(m){e(h);foo_bla(hoo_moo(boo_doo));function z(a){if(b){}for(var i=0;i<h.length;i++){h.bla();}}}return c(f);}}}
+    @c.minimize(src).should == %{var something=function(d,g){var s="function(asdf, boo) { asdf(); boo; }";var e,j=1;var k=function(b,f,h){var h=h||f,b=f.something(h,asdf());f=h*b/f;function c(m){e(h);foo_bla(hoo_moo(boo_doo));function z(a){if(b){}for(var i=0;i<h.length;i++){h.bla()}}}return c(f)}}}
+  end
+  
+  it "should escape strings and regexps properly" do 
+    @c.remove_comments(%{
+      var str = "asdf \\\\ \\n /* asdf */";
+      var str = /\\D/;
+      var str = '\\D';
+    }).should == %{
+      var str = "asdf \\\\ \\n /* asdf */";
+      var str = /\\D/;
+      var str = '\\D';
+    }
   end
 end

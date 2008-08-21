@@ -12,7 +12,7 @@ module FrontCompiler::JSCompactor::Util
   
   def find_block(stack, left="(")
     right = BLOCK_CHUNKS[left]
-    block = stack[/\A\s*#{Regexp.escape(left)}/im]
+    block = stack[/\A\s*#{Regexp.escape(left)}/im] || ''
     stack = stack[block.size, stack.size].split('')
     
     count = 0

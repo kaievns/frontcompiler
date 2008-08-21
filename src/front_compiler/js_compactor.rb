@@ -18,7 +18,7 @@ class FrontCompiler::JSCompactor
   # removes all the comments out of the source code
   def remove_comments(source)
     for_outstrings_of(source) do |str|
-      str.gsub! /\/\*.*?\*\//m, ''
+      str.gsub! /\/\*.*?\*\//im, ''
       str.gsub! /\/\/.*?$/, ''
       str
     end
@@ -35,7 +35,8 @@ class FrontCompiler::JSCompactor
   def remove_trailing_spaces(source)
     for_outstrings_of(source) do |str|
       str.gsub! /([\]\)\w\d_"'])(\s*?\n)/, '\1;\2'
-      str.gsub /\s*(=|\+|\-|<|>|\?|\|\||&&|\!|\{|\}|,|\)|\(|;|\]|\[|:|\*|\/)\s*/im, '\1'
+      str.gsub! /\s*(=|\+|\-|<|>|\?|\|\||&&|\!|\{|\}|,|\)|\(|;|\]|\[|:|\*|\/)\s*/im, '\1'
+      str.gsub /;(\]|\)|\})/, '\1' # removing wrong added semicolons
     end
   end
   
@@ -60,9 +61,21 @@ protected
   # but keeping the strings safe
   #
   def for_outstrings_of(str, &block)
-    # preserving the string definitions
     strings = []
-    src = str.gsub /('|").*?[^\\](\1)/mx do |match|
+    
+    # preserving the regular expressions
+    str = str.gsub /[^\*\\\/]\/[^\*\/].*?[^\\\*\/]\// do |match|
+      replacement = "regexp$%#{strings.length}$%replacement"
+      strings << { 
+        :replacement => replacement, 
+        :original    => match.to_s
+      }
+      
+      replacement
+    end
+    
+    # preserving the string definitions
+    str = str.gsub /('|").*?[^\\](\1)/ do |match|
       replacement = "string$%#{strings.length}$%replacement"
       strings << { 
         :replacement => replacement, 
@@ -73,13 +86,13 @@ protected
     end
     
     # running the handler
-    src = yield(src)
+    str = yield(str)
     
     # bgingin the strings back
-    strings.each do |s|
-      src.gsub! s[:replacement], s[:original]
+    strings.reverse.each do |s|
+      str.gsub! s[:replacement], s[:original].gsub('\\','\\\\\\\\')
     end
     
-    src
+    str
   end
 end
