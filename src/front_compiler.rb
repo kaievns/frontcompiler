@@ -7,6 +7,8 @@
 class FrontCompiler
   def initialize
     @js_compactor = JSCompactor.new
+    @css_compactor = CSSCompactor.new
+    @html_compactor = HTMLCompactor.new
   end
   
   # compacts all the files out of the list
@@ -36,11 +38,16 @@ class FrontCompiler
   
   # compacts a CSS source code
   def compact_css(source)
-    source
+    @css_compactor.minimize(source)
   end
   
   # compacts a HTML code
   def compact_html(source)
-    source
+    @html_compactor.minimize(source)
+  end
+  
+  # inlines the css-sourcecode in a javascript code
+  def inline_css(source)
+    @css_compactor.to_javascript(source)
   end
 end
