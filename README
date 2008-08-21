@@ -5,7 +5,7 @@ FrontCompiler is a simple collection of compactors for the JavaScript,
 CSS and HTML source code. It removes trailing whitespaces, comments and
 transformates the local variables to make the sourcecode shorter.
 
-The library can be used as a plugin for rails.
+The library can be used as a plugin for rails. See description below.
 
 
 Usage
@@ -60,6 +60,31 @@ and the application stylesheets in one.
 
 NOTE: if the user have JavaScript switched off, then he won't see the
 styles.
+
+
+Rails Usage
+===========
+
+The project can be used as a usual rails plugin. Just clone the
+project into your vendor/plugins/front_compiler directory and you will
+have the following methods aviable both in your controllers and
+templates
+
+
+* compact_files(list) - compacts the files fromt the given list and
+                        puts them in a single string. You can specify
+                        a list of file-names here.
+
+* compact_file(file)  - compacts the given file (can be a file-name)
+
+* compact_js(source)  - returns compacted version of the given source
+* compact_css(source)
+* compact_html(source)
+
+* inline_css(source)    - converts the css-source in javascript
+* inline_css_file(file) - converts the given css-file in a javascript
+                          source (can be a file-name)
+
 
 Enjoy!
 
