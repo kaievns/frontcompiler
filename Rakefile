@@ -44,8 +44,8 @@ spec = Gem::Specification.new do |s|
   s.version      = FrontCompiler::VERSION
   s.platform     = Gem::Platform::RUBY
   s.author       = "Nikolay V. Nemshilov"
-  s.email        = "n/a"
-  s.homepage     = "n/a"
+  s.email        = "nemshilov@gmail.com"
+  s.homepage     = "http://st-on-it.blogspot.com"
   s.summary      = "FrontCompiler is a simple collection of compactors for the JavaScript,
   CSS and HTML source code. It removes trailing whitespaces, comments and
   transformates the local variables to make the sourcecode shorter."
