@@ -7,8 +7,6 @@ transformates the local variables to make the sourcecode shorter.
 
 The library can be used as a plugin for rails.
 
-NOTE: the project is still in development, not everything works yet.
-
 
 Usage
 =====
@@ -38,5 +36,30 @@ or you can compact several files at once like that
 Same for the other file-types
 
 
+CSS Inlining
+============
+
+With the tool you can convert your css source in some javascript
+definition so you could put the styles in the same file as your
+javascript and have -1 (or several) hits to your sever.
+
+File('public/javascripts/all_in_one.js', 'w') do |file|
+  file.write @c.compact_files(%w{
+    public/javascripts/prototype.js
+    public/javascripts/effects.js
+    public/javascripts/application.js
+  })
+
+  file.write @c.inline(
+    File.open('public/stylesheets/application.css').read
+  )
+end
+
+Now you have a single javascript file which contains both, javascript
+and the application stylesheets in one.
+
+Enjoy!
+
+--
 The code released under terms of the MIT License
 Copyright (C) 2008 Nikolay V. Nemshilov
