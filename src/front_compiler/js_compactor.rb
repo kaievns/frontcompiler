@@ -7,9 +7,8 @@ class FrontCompiler::JSCompactor
   # applies all the compactings to the source
   def minimize(source)
     source = remove_comments(source)
-#    source = convert_one_line_constructions(source)
     source = compact_local_names(source)
-    source = remove_empty_lines(source)
+#    source = remove_empty_lines(source)
     source = remove_trailing_spaces(source)
     
     source.strip
@@ -41,18 +40,18 @@ class FrontCompiler::JSCompactor
     end
   end
   
+  # compacts the local names of the functions in the source code
+  def compact_local_names(source)
+    for_outstrings_of(source) do |str|
+      NamesCompactor.compact str
+    end
+  end
+
   # converts the one line if/for/while constructions 
   # into multilined ones
   def convert_one_line_constructions(source)
     for_outstrings_of(source) do |str|
       ShortcutsConverter.convert str
-    end
-  end
-  
-  # compacts the local names of the functions in the source code
-  def compact_local_names(source)
-    for_outstrings_of(source) do |str|
-      NamesCompactor.compact str
     end
   end
   

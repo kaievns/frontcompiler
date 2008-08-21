@@ -12,11 +12,13 @@ module FrontCompiler::JSCompactor::Util
   
   def find_block(stack, left="(")
     right = BLOCK_CHUNKS[left]
-    block = stack[/\A\s*#{Regexp.escape(left)}/im] || ''
-    stack = stack[block.size, stack.size].split('')
+    block = stack[/\A\s*#{Regexp.escape(left)}/im] || ''    
+    stack = stack[block.size, stack.size]
     
     count = 0
-    while char = stack.shift
+    (0...stack.size).each do |i|
+      char = stack[i,1]
+      
       block << char
       
       if char == right and count == 0
