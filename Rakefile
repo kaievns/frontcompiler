@@ -15,6 +15,7 @@ include FileUtils
 NAME = "front_compiler"
 
 require "lib/front_compiler"
+require "lib/front_compiler_helper"
 
 def sudo
   ENV['FC_SUDO'] ||= "sudo"

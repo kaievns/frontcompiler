@@ -58,4 +58,3 @@ end
 require "front_compiler/js_compactor"
 require "front_compiler/css_compactor"
 require "front_compiler/html_compactor"
-require "front_compiler/rails_controller_helper"
