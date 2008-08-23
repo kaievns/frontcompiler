@@ -46,14 +46,6 @@ class FrontCompiler::JSCompactor
       NamesCompactor.compact str
     end
   end
-
-  # converts the one line if/for/while constructions 
-  # into multilined ones
-  def convert_one_line_constructions(source)
-    for_outstrings_of(source) do |str|
-      ShortcutsConverter.convert str
-    end
-  end
   
 protected
   #
@@ -100,5 +92,3 @@ end
 
 require "front_compiler/js_compactor/util"
 require "front_compiler/js_compactor/names_compactor"
-require "front_compiler/js_compactor/shortcuts_converter"
-
