@@ -1,8 +1,8 @@
 require File.dirname(__FILE__)+"/../../spec_helper"
 
-describe NamesCompactor do
+describe FrontCompiler::JSCompactor::NamesCompactor do
   before :all do 
-    @c = NamesCompactor
+    @c = FrontCompiler::JSCompactor::NamesCompactor
   end
   
   it "should compact local variable names" do 

@@ -3,7 +3,7 @@
 #
 # Copyright (C) Nikolay V. Nemshilov aka St.
 #
-class NamesCompactor
+class FrontCompiler::JSCompactor::NamesCompactor
   extend FrontCompiler::JSCompactor::Util
   
   class << self
