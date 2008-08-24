@@ -78,14 +78,14 @@ class FrontCompiler::JSCompactor::StructuresCompactor
       end
       
       # removing wrongly added semicolons at 'else' constructions
-      str.gsub! /([^a-z\d_$\.](else|try|finally));/im, '\1'
+      str.gsub! /([^a-z\d_$\.](else|do|try|finally));/im, '\1'
       offset = 0
-      while pos = str.index(/(else|try|finally)\s*?\{/im, offset)
+      while pos = str.index(/(else|do|try|finally)\s*?\{/im, offset)
         offset = pos+1
         start = str[0, pos]
         stack = str[pos, str.size]
         
-        start+= stack[/\A(else|try|finally)\s*/im]
+        start+= stack[/\A(else|do|try|finally)\s*/im]
         stack = str[start.size, stack.size]
         
         block = find_block(stack, '{')
