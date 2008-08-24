@@ -154,19 +154,28 @@ class FrontCompiler::JSCompactor::StructuresCompactor
       end
       
       # recoursive call on the rest of the stack
-      block + simplify_logical_constructions(stack)
+      simplify_logical_constructions(block) + 
+        simplify_logical_constructions(stack)
     end
     
     # checks the number of code lines in the string
     def number_of_code_lines_in(str)
+      str = str.dup
+      
       # removing all the method calls, blocks and lists
       ['[', '(', '{'].each do |token|
-        while pos = (str.include?(token))
+        offset = 0
+        while pos = str.index(token, offset)
+          offset = pos + 1
           start = str[0, pos]
           stack = str[pos, str.size]
           block = find_block(stack, token)
           
-          str.gsub! block, token
+          str.gsub! block, case token
+                             when '(' then '()'
+                             when '[' then '[]'
+                             else ';'
+                           end
         end
       end
       

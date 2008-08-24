@@ -152,4 +152,54 @@ describe FrontCompiler::JSCompactor::StructuresCompactor do
       while (something())  foo; 
     }
   end
+  
+  it "should keep internal multilined constructions safe" do 
+    @c.compact(%{
+      if (something) {
+        for (var i=0; i<something.length; i++) {
+          var boo = something[i];
+          var foo = boo % i;
+        }
+      }
+    }).should == %{
+      if (something) 
+        for (var i=0; i<something.length; i++) {
+          var boo = something[i];
+          var foo = boo % i;
+        }
+      
+    }
+  end
+  
+  it "should handle nested constructions" do 
+    @c.compact(%{
+      if (something) {
+        for (var k in o) {
+          while(something) {
+            var o[k] = something;
+          }
+        }
+      } else {
+        while (something) {
+          for (var k in o) {
+            something = o[k];
+          }
+        }
+      }
+    }).should == %{
+      if (something) 
+        for (var k in o) 
+          while(something) 
+            var o[k] = something;
+          
+        
+       else 
+        while (something) 
+          for (var k in o) 
+            something = o[k];
+          
+        
+      
+    }
+  end
 end
