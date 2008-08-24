@@ -8,7 +8,6 @@ describe FrontCompiler::JSCompactor::NamesCompactor do
   it "should compact local variable names" do 
     src = %{
       var something = function(bla, foo) { 
-        var str = "function(asdf, boo) { asdf(); boo; }"
         var doo, hoo = 1;
         var moo = function(boo, foo, hoo) {
           var hoo = hoo || foo, boo = foo.something(hoo, asdf());
@@ -48,7 +47,6 @@ describe FrontCompiler::JSCompactor::NamesCompactor do
 
     @c.compact(src).should == %{
       var something = function(n, p) { 
-        var s = "function(asdf, boo) { asdf(); boo; }"
         var o, q = 1;
         var r = function(f, g, h) {
           var h = h || g, f = g.something(h, asdf());

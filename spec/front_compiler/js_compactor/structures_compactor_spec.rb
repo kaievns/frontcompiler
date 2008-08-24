@@ -115,6 +115,50 @@ describe FrontCompiler::JSCompactor::StructuresCompactor do
     }
   end
   
+  it "should not touch objects and arrays definitions" do 
+    @c.compact(%{
+      var str = {
+        a: {
+          b: c,
+          d: e
+        },
+        f: [
+          g, h
+        ]
+      }
+    }).should == %{
+      var str = {
+        a: {
+          b: c, d: e
+        }, f: [
+          g, h
+        ]
+      };
+    }
+  end
+  
+  it "should not break try/catch/finally constructions" do 
+    @c.compact(%{
+      try { bla; bla
+      }
+      catch(e) {
+        bla; bla; bla
+      }
+      finally { 
+        bla; bla; bla
+      }
+    }).should == %{
+      try { bla; bla;
+      }
+      catch(e) {
+        bla; bla; bla;
+      }
+      finally { 
+        bla; bla; bla;
+      }
+    }
+  end
+  
   it "should not touch multilined logic constructions" do 
     @c.compact(%{
       if (something) {
@@ -200,6 +244,22 @@ describe FrontCompiler::JSCompactor::StructuresCompactor do
           
         
       
+    }
+  end
+  
+  it "should keep doubleifs alive" do 
+    @c.compact(%{
+      if (something) {
+        if (something_else) {
+          bla; bla;
+        }
+      }
+    }).should == %{
+      if (something) {
+        if (something_else) {
+          bla; bla;
+        }
+      }
     }
   end
 end

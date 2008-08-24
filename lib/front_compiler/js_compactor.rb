@@ -9,6 +9,8 @@ class FrontCompiler::JSCompactor
     source = remove_comments(source)
     source = compact_structures(source)
     source = compact_local_names(source)
+    # FIXME Prototype compilation hack
+    source.sub! "return a.childNodes[0] ? (a.childNodes.length > 1 ? $A(a.childNodes).inject('', function(memo, node) { return memo + node.nodeValue }) : div.childNodes[0].nodeValue) : '';", "return a.childNodes[0] ? (a.childNodes.length > 1 ? $A(a.childNodes).inject('', function(x, y) { return x + y.nodeValue }) : a.childNodes[0].nodeValue) : '';"
 #    source = remove_empty_lines(source)
     source = remove_trailing_spaces(source)
     

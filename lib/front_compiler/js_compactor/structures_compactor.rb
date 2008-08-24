@@ -47,13 +47,13 @@ class FrontCompiler::JSCompactor::StructuresCompactor
       
       # removing wrongly added somicolons at logical expressions
       offset = 0
-      while pos = str.index(/(if|for|while)\s*\(/im, offset)
+      while pos = str.index(/(if|for|while|catch)\s*\(/im, offset)
         offset = pos + 1
         
         start = str[0, pos]
         stack = str[pos, str.size]
         
-        start+= stack[/\A(if|for|while)\s*/im]
+        start+= stack[/\A(if|for|while|catch)\s*/im]
         stack = str[start.size, str.size]
         
         start+= find_block(stack, '(')
@@ -78,14 +78,14 @@ class FrontCompiler::JSCompactor::StructuresCompactor
       end
       
       # removing wrongly added semicolons at 'else' constructions
-      str.gsub! /([^a-z\d_$\.]else);/im, '\1'
+      str.gsub! /([^a-z\d_$\.](else|try|finally));/im, '\1'
       offset = 0
-      while pos = str.index(/else\s*?\{/im, offset)
+      while pos = str.index(/(else|try|finally)\s*?\{/im, offset)
         offset = pos+1
         start = str[0, pos]
         stack = str[pos, str.size]
         
-        start+= stack[/\Aelse\s*/im]
+        start+= stack[/\A(else|try|finally)\s*/im]
         stack = str[start.size, stack.size]
         
         block = find_block(stack, '{')
@@ -98,6 +98,28 @@ class FrontCompiler::JSCompactor::StructuresCompactor
         str = start + stack
       end
       
+      # removing wrongly added semicolons at objects and arrays
+      ['{', '['].each do |token|
+        offset = 0
+        while pos = str.index(/[:=,\(n]\s*?#{Regexp.escape(token)}/im, offset)
+          offset = pos + 2
+          
+          start = str[0, pos]
+          stack = str[pos, str.size]
+          
+          pos = stack.index(token)
+          start+= stack[0, pos]
+          stack = stack[pos, stack.size]
+          
+          block = find_block(stack, token)
+          stack = stack[block.size, stack.size]
+          
+          block.gsub! /;(\s*?#{token=='{'?'\}':'\]'}\Z)/im, '\1'
+          
+          str = start + block + stack
+        end
+      end
+      
       str
     end
     
@@ -108,6 +130,7 @@ class FrontCompiler::JSCompactor::StructuresCompactor
       if pos = str.index(/(if|for|while)\s*\(/im)
         start = str[0, pos]
         stack = str[pos, str.size]
+        is_if = stack =~ /\Aif/im # used in the double-ifs check
         
         # cutdown the method name
         start+= stack[/\A(if|for|while)\s*/im]
@@ -123,7 +146,7 @@ class FrontCompiler::JSCompactor::StructuresCompactor
           stack = str[start.size, str.size]
           
           # join back the string
-          str = start + check_first_block_of(stack)
+          str = start + check_first_block_of(stack, is_if)
         end
       end
       
@@ -143,14 +166,14 @@ class FrontCompiler::JSCompactor::StructuresCompactor
     
   private
     # checks the first block of the stack
-    def check_first_block_of(stack)
+    def check_first_block_of(stack, is_if=false)
       block = find_block(stack, '{')
       stack = stack[block.size, stack.size]
       
       # checking the number of code-lines in the block
       block_code = block[1, block.size-2]
       if number_of_code_lines_in(block_code) == 1
-        block = block_code
+        block = block_code if !(is_if and block_code =~ /\A\s*?if/im)
       end
       
       # recoursive call on the rest of the stack
