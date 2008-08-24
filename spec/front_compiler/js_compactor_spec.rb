@@ -99,12 +99,14 @@ describe FrontCompiler::JSCompactor do
             }
           }
 
+          if (something) { boo }
+
           return moo(foo);
         }
       }
     }
     
-    @c.minimize(src).should == %{var something=function(h,k){var n="function(asdf, boo) { asdf(); boo; }";var j,l=1;var m=function(d,e,f){var f=f||e,d=e.something(f,asdf());e=f*d/e;function g(b){j(f);foo_bla(hoo_moo(boo_doo));function c(a){if(d){}for(var i=0;i<f.length;i++)f.bla()}}return g(e)}}}
+    @c.minimize(src).should == %{var something=function(h,k){var n="function(asdf, boo) { asdf(); boo; }";var j,l=1;var m=function(d,e,f){var f=f||e,d=e.something(f,asdf());e=f*d/e;function g(b){j(f);foo_bla(hoo_moo(boo_doo));function c(a){if(d){}for(var i=0;i<f.length;i++)f.bla()}};if(something){d}return g(e)}};}
   end
   
   it "should escape strings and regexps properly" do 

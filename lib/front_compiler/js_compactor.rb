@@ -7,6 +7,7 @@ class FrontCompiler::JSCompactor
   # applies all the compactings to the source
   def minimize(source)
     source = remove_comments(source)
+    source = compact_structures(source)
     source = compact_local_names(source)
 #    source = remove_empty_lines(source)
     source = remove_trailing_spaces(source)
@@ -44,6 +45,13 @@ class FrontCompiler::JSCompactor
   def compact_local_names(source)
     for_outstrings_of(source) do |str|
       NamesCompactor.compact str
+    end
+  end
+  
+  # compacts the logical structures
+  def compact_structures(source)
+    for_outstrings_of(source) do |str|
+      StructuresCompactor.compact str
     end
   end
   
