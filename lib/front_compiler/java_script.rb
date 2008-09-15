@@ -10,11 +10,13 @@ class FrontCompiler::JavaScript < FrontCompiler::SourceCode
   include LogicCompactor, NamesCompactor
   
   def compact
-    remove_comments.
-      compact_logic.
-      compact_names.
-      remove_empty_lines.
-      remove_trailing_spaces
+    string_safely do 
+      remove_comments.
+        compact_logic.
+        compact_names.
+        remove_empty_lines.
+        remove_trailing_spaces
+    end
   end
   
   def remove_comments
@@ -44,6 +46,11 @@ protected
   # executes the given block, safely for the strings and regular expressions
   # declared in the source-code
   def string_safely(&block)
+    if @in_string_safe_mode
+      yield
+      return self
+    end
+    
     outtakes = []
     
     [/([^\*\\\/])\/[^\*\/].*?[^\\\*\/]\//, # <- regexps
@@ -61,6 +68,7 @@ protected
         start + replacement
       end
     end
+    @in_string_safe_mode = true
     
     yield
     
@@ -68,6 +76,7 @@ protected
     outtakes.reverse.each do |s|
       gsub! s[:replacement], s[:original].gsub('\\','\\\\\\\\') # <- escapes reescaping
     end
+    @in_string_safe_mode = false
     
     self
   end
