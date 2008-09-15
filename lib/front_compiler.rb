@@ -9,7 +9,6 @@ class FrontCompiler
   VERSION = "0.1"
   
   def initialize
-    @js_compactor = JSCompactor.new
     @css_compactor = CSSCompactor.new
     @html_compactor = HTMLCompactor.new
   end
@@ -36,7 +35,7 @@ class FrontCompiler
   
   # compacts a JavaScript source code
   def compact_js(source)
-    @js_compactor.minimize(source)
+    JavaScript.new(source).compact
   end
   
   # compacts a CSS source code
@@ -55,6 +54,7 @@ class FrontCompiler
   end
 end
 
-require "front_compiler/js_compactor"
+require "front_compiler/source_code"
+require "front_compiler/java_script"
 require "front_compiler/css_compactor"
 require "front_compiler/html_compactor"

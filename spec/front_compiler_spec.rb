@@ -2,11 +2,10 @@ require File.dirname(__FILE__)+"/spec_helper"
 
 describe FrontCompiler do 
   before :each do 
-    @js = FrontCompiler::JSCompactor.new
+    @js = FrontCompiler::JavaScript.new ''
     @css = FrontCompiler::CSSCompactor.new
     @html = FrontCompiler::HTMLCompactor.new
     
-    FrontCompiler::JSCompactor.should_receive(:new).and_return(@js)
     FrontCompiler::CSSCompactor.should_receive(:new).and_return(@css)
     FrontCompiler::HTMLCompactor.should_receive(:new).and_return(@html)
     
@@ -14,7 +13,8 @@ describe FrontCompiler do
   end
   
   it "should involve the js compactor" do 
-    @js.should_receive(:minimize).and_return('')
+    FrontCompiler::JavaScript.should_receive(:new).and_return(@js)
+    @js.should_receive(:compact).and_return('')
     @c.compact_js('')
   end
   

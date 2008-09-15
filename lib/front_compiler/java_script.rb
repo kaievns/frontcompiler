@@ -9,6 +9,14 @@ require "front_compiler/java_script/names_compactor"
 class FrontCompiler::JavaScript < FrontCompiler::SourceCode
   include LogicCompactor, NamesCompactor
   
+  def compact
+    remove_comments.
+      compact_logic.
+      compact_names.
+      remove_empty_lines.
+      remove_trailing_spaces
+  end
+  
   def remove_comments
     string_safely do 
       gsub!(/\/\*.*?\*\//im, '')
@@ -38,27 +46,20 @@ protected
   def string_safely(&block)
     outtakes = []
     
-    # preserving regular expressions
-    gsub!(/([^\*\\\/])\/[^\*\/].*?[^\\\*\/]\//) do |match|
-      replacement = "rIgAxp$$$#{outtakes.length}$$$riPlOcImEnt"
-      start = $1.dup
-      outtakes << { 
-        :replacement => replacement, 
-        :original    => match.to_s[start.size, match.to_s.size]
-      }
-      
-      start + replacement
-    end
-    
-    # preserving the string definitions
-    gsub!(/('|").*?[^\\](\1)/) do |match|
-      replacement = "sfTEEg$$$#{outtakes.length}$$$riPlOcImEnt"
-      outtakes << { 
-        :replacement => replacement, 
-        :original    => match.to_s
-      }
-      
-      replacement
+    [/([^\*\\\/])\/[^\*\/].*?[^\\\*\/]\//, # <- regexps
+     /(\A|[^\\])('|")(\2)/,                # <- empty strings
+     /(\A|[^\\])('|").*?[^\\](\2)/         # <- usual strings
+    ].each do |regexp|
+      gsub! regexp do |match|
+        replacement = "rIgAxpOrStrEEng$$$#{outtakes.length}$$$riPlOcImEnt"
+        start = $1.dup
+        outtakes << { 
+          :replacement => replacement, 
+          :original    => match.to_s[start.size, match.to_s.size]
+        }
+        
+        start + replacement
+      end
     end
     
     yield
