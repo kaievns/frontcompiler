@@ -250,4 +250,28 @@ describe FrontCompiler::JavaScript::LogicCompactor do
       
     }
   end
+  
+  it "should whatch if/else conditions intersections" do 
+    compact(%{
+      if (something) {
+        for (something) {
+          if (something) {
+            return something;
+          }
+        }
+      } else {
+        return null;
+      }
+    }).should == %{
+      if (something) {
+        for (something) 
+          if (something) 
+            return something;
+          
+        
+      } else 
+        return null;
+      
+    }
+  end
 end

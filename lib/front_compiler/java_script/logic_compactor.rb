@@ -53,14 +53,31 @@ class FrontCompiler
               block += body[/\A\s*/m]; body.strip! # removing starting empty-chars
               body_code = body[1, body.size-2]
               
-              if number_of_code_lines_in(body_code) == 1 and
-                !(name=='if' and body_code.match(/\A\s*if\s*\(/im)) # <- double ifs skip
-                check_semicolons_in body_code
-                simplify_constructions_of body_code
+              # checking if the code can be simplified
+              can_be_simplified = number_of_code_lines_in(body_code) == 1
+              
+              # check additional 'if' constructions restrictions
+              if can_be_simplified and name == 'if'
+                # double ifs construction check
+                can_be_simplified &= !body_code.match(/\A\s*if\s*\(/im)
                 
-                src[pos+block.size, body.size] = body_code
-                body = body_code
+                # checking the else blocks missintersections
+                if src[pos+block.size+body.size, 40].match(/\A\s*else(\s+|\{)/)
+                  can_be_simplified &= !body_code.match(/(\A|[^a-z\d_$])if\s*\(/)
+                end
               end
+              
+              # try to simplify internal constructions
+              simplify_constructions_of body_code
+              
+              if can_be_simplified
+                check_semicolons_in body_code
+              else
+                body_code = "{#{body_code}}"
+              end
+              
+              src[pos+block.size, body.size] = body_code
+              body = body_code
             end
             
             offset = pos + block.size + body.size
