@@ -66,6 +66,9 @@ class FrontCompiler
             offset = pos + block.size + body.size
           end
         end
+        
+        # removing bugy semicolons
+        src.gsub!(/(\}\s*);(\s*else\s+)/, '\1\2')
       end
       
       # calculates the number of code-lines in the string
@@ -82,6 +85,9 @@ class FrontCompiler
             src[pos, block.size] = pair
           end
         end
+        
+        # putting semicolons after try/catch/finally constructions, so they were conuted as well
+        src.gsub!(/(catch\s*\(\)|finally)\s*\{\}/, '\&;')
         
         # calculating the number of the lines
         src.split(';').collect{ |line|

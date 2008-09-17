@@ -214,4 +214,40 @@ describe FrontCompiler::JavaScript::LogicCompactor do
       }
     }
   end
+  
+  it "should remove semicolons after functions which before the 'else' keyword" do 
+    compact(%{
+      if (something) {
+        function() {
+        };
+      } else {
+        something;
+      }
+    }).should == %{
+      if (something) 
+        function() {
+        }
+       else 
+        something;
+      
+    }
+  end
+  
+  it "should calculate try/catch constructions as code lines" do 
+    compact(%{
+      if (something) {
+        try {something} catch(MyException e) {}
+        try {another} finally {}
+      } else {
+        do_nothing;
+      }
+    }).should == %{
+      if (something) {
+        try {something} catch(MyException e) {}
+        try {another} finally {}
+      } else 
+        do_nothing;
+      
+    }
+  end
 end
