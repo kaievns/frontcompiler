@@ -274,4 +274,30 @@ describe FrontCompiler::JavaScript::LogicCompactor do
       
     }
   end
+  
+  it "should calculate number of constructions correctly in such case" do 
+    compact(%{
+      if (a) {
+        for (k in a) {
+          if (a)
+            t;
+        }
+
+        if (a) {
+          each;
+        }
+      }
+    }).should == %{
+      if (a) {
+        for (k in a) 
+          if (a)
+            t;
+        
+
+        if (a) 
+          each;
+        
+      }
+    }
+  end
 end

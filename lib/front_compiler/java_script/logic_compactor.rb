@@ -105,6 +105,7 @@ class FrontCompiler
         
         # putting semicolons after try/catch/finally constructions, so they were conuted as well
         src.gsub!(/(catch\s*\(\)|finally)\s*\{\}/, '\&;')
+        src.gsub!(/\(\)\s*\{\}/, '\&;')
         
         # calculating the number of the lines
         src.split(';').collect{ |line|
