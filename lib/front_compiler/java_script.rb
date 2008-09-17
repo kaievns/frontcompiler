@@ -53,9 +53,9 @@ protected
     
     outtakes = []
     
-    [/([^\*\\\/])\/[^\*\/][^\n]*?[^\\\*\/\n]\//, # <- regexps
-     /(\A|[^\\])('|")(\2)/,                      # <- empty strings
-     /(\A|[^\\])('|").*?[^\\](\2)/               # <- usual strings
+    [/(\A|[^\\])('|")(\2)/,                      # <- empty strings
+     /(\A|[^\\])('|").*?[^\\](\2)/,              # <- usual strings
+     /([^\*\\\/])\/[^\*\/][^\n]*?[^\*\n\\](?!\\\/)\//, # <- regexps
     ].each do |regexp|
       gsub! regexp do |match|
         replacement = "rIgAxpOrStrEEng$$$#{outtakes.length}$$$riPlOcImEnt"
