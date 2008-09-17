@@ -22,7 +22,7 @@ class FrontCompiler::JavaScript < FrontCompiler::SourceCode
   def remove_comments
     string_safely do 
       gsub!(/\/\*.*?\*\//im, '')
-      gsub!(/\/\/.*?$/, '')
+      gsub!(/\/\/.*?($)/, '\1')
     end
   end
   
@@ -53,9 +53,9 @@ protected
     
     outtakes = []
     
-    [/([^\*\\\/])\/[^\*\/].*?[^\\\*\/]\//, # <- regexps
-     /(\A|[^\\])('|")(\2)/,                # <- empty strings
-     /(\A|[^\\])('|").*?[^\\](\2)/         # <- usual strings
+    [/([^\*\\\/])\/[^\*\/][^\n]*?[^\\\*\/\n]\//, # <- regexps
+     /(\A|[^\\])('|")(\2)/,                      # <- empty strings
+     /(\A|[^\\])('|").*?[^\\](\2)/               # <- usual strings
     ].each do |regexp|
       gsub! regexp do |match|
         replacement = "rIgAxpOrStrEEng$$$#{outtakes.length}$$$riPlOcImEnt"
