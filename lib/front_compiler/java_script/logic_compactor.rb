@@ -83,9 +83,6 @@ class FrontCompiler
             offset = pos + block.size + body.size
           end
         end
-        
-        # removing bugy semicolons
-        src.gsub!(/(\}\s*);(\s*else\s+)/, '\1\2')
       end
       
       # calculates the number of code-lines in the string
@@ -117,6 +114,11 @@ class FrontCompiler
     # checks if there's ommited semicolons in the code
     def check_semicolons_in(src)
       src[/\s*\Z/m] = ";#{src[/\s*\Z/m]}" unless src.strip[-1,1].match(/[;\}]/)
+      
+      # removing bug causing semicolons after a function
+      src.gsub!(/(\A\s*function\s*.*?\(.*?\)\s*\{.*?\});(\s*\Z)/im) do
+        $1 + $2
+      end
     end
   end
 end
