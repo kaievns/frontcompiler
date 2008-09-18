@@ -55,8 +55,13 @@ class FrontCompiler
         ).each do |name, replacement|
           # replacing the names
           [args, body].each do |str|
-            str.gsub!(/(\A|[^\w\d_\.\$])#{Regexp.escape(name)}(?![\w\d_:\$])/) do
+            str.gsub!(/(\A|[^\w\d_\.\$])#{Regexp.escape(name)}(?![\w\d_\$]|\s*:)/) do
               $1 + replacement
+            end
+            
+            # replacing the names in the short 'a ? b : c' conditions
+            str.gsub!(/([^\{,\s\w\d_\.\$]\s*)#{Regexp.escape(name)}(\s*?:)/) do
+              $1 + replacement + $2
             end
           end
         end

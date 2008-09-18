@@ -180,13 +180,15 @@ describe FrontCompiler::JavaScript::NamesCompactor do
   it "should not break object keys definitions" do 
     compact(%{
       function(foo, boo) {
-        var moo = {foo: foo, boo: boo};
-        moo = [foo, boo];
+        var moo = {foo: foo, boo  : boo};
+        moo = foo ? boo : [foo, boo];
+        boo = { mooboo: moo + boo }
       }
     }).should == %{
       function(f, b) {
-        var m = {foo: f, boo: b};
-        m = [f, b];
+        var m = {foo: f, boo  : b};
+        m = f ? b : [f, b];
+        b = { mooboo: m + b }
       }
     }
   end
