@@ -9,21 +9,21 @@ class FrontCompiler::CssSource < FrontCompiler::SourceCode
   include NestedStyles
   
   # removes all the comments out of the given source
-  def remove_comments
+  def remove_comments!
     string_safely do 
       gsub!(/\/\*.*?\*\//im, '')
     end
   end
   
   # removes all the empty lines out of the source code
-  def remove_empty_lines
+  def remove_empty_lines!
     string_safely do
       gsub!(/\n\s*\n/m, "\n")
     end
   end
   
   # removes tailing whitespaces out of the source code
-  def remove_trailing_spaces
+  def remove_trailing_spaces!
     string_safely do
       gsub!(/\s+/im, ' ')
       gsub!(/\s*(\+|>|\||~|\{|\}|,|\)|\(|;|:|\*)\s*/im, '\1')

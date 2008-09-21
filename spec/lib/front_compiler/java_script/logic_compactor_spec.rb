@@ -2,11 +2,11 @@ require File.dirname(__FILE__)+"/../../../spec_helper"
 
 describe FrontCompiler::JavaScript::LogicCompactor do
   def compact(src)
-    FrontCompiler::JavaScript.new(src).compact_logic
+    FrontCompiler::JavaScript.new(src).compact_logic!
   end
   
   it "should have the compact_logic method" do 
-    FrontCompiler::JavaScript.new('').should respond_to(:compact_logic)
+    FrontCompiler::JavaScript.new('').should respond_to(:compact_logic!)
   end
   
   it "should convert multi-lined if/else short constructions" do 

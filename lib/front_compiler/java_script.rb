@@ -9,30 +9,30 @@ require "front_compiler/java_script/names_compactor"
 class FrontCompiler::JavaScript < FrontCompiler::SourceCode
   include LogicCompactor, NamesCompactor
   
-  def compact
+  def compact!
     string_safely do 
-      remove_comments.
-        compact_logic.
-        compact_names.
-        remove_empty_lines.
-        remove_trailing_spaces
+      remove_comments!.
+        compact_logic!.
+        compact_names!.
+        remove_empty_lines!.
+        remove_trailing_spaces!
     end
   end
   
-  def remove_comments
+  def remove_comments!
     string_safely do 
       gsub!(/\/\*.*?\*\//im, '')
       gsub!(/\/\/.*?($)/, '\1')
     end
   end
   
-  def remove_empty_lines
+  def remove_empty_lines!
     string_safely do 
       gsub!(/\n\s*\n/m, "\n")
     end
   end
   
-  def remove_trailing_spaces
+  def remove_trailing_spaces!
     string_safely do 
       gsub!(/\s+/im, ' ') # cutting down all spaces to the minimum
       gsub!(/\s*(=|\+|\-|<|>|\?|\|\||&&|\!|\{|\}|,|\)|\(|;|\]|\[|:|\*|\/)\s*/im, '\1')

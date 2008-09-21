@@ -9,7 +9,7 @@
 class FrontCompiler
   class JavaScript < FrontCompiler::SourceCode
     module NamesCompactor
-      def compact_names
+      def compact_names!
         string_safely do 
           compact_names_of self
         end

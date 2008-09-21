@@ -2,11 +2,11 @@ require File.dirname(__FILE__)+"/../../../spec_helper"
 
 describe FrontCompiler::JavaScript::NamesCompactor do
   def compact(src)
-    FrontCompiler::JavaScript.new(src).compact_names
+    FrontCompiler::JavaScript.new(src).compact_names!
   end
   
   it "should have the compact_logic method" do 
-    FrontCompiler::JavaScript.new('').should respond_to(:compact_names)
+    FrontCompiler::JavaScript.new('').should respond_to(:compact_names!)
   end
   
   it "should not touch any local variables" do 

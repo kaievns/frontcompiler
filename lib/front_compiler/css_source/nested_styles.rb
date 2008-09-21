@@ -8,17 +8,19 @@ class FrontCompiler
   class FrontCompiler::CssSource < FrontCompiler::SourceCode
     module NestedStyles
       # overloads the constructor, to convert the styles on fly
-      def initialize(src)
-        super convert_nested_styles_of(src)
+      def initialize(src, keep_as_is=false)
+        super src
+        convert_nested_styles! unless keep_as_is
       end
       
-    protected
-      def convert_nested_styles_of(src)
+      # converts the nested styles constructions in the source
+      CSS_CONSTRUCTION_RE = /((\A|\}|;)\s*?([^\}\{;]+?)\s*?)\{.*?\}/m
+      def convert_nested_styles!
         # loop though the blocks
         offset = 0
-        while pos = src.index(/((\A|\}|;)\s*?([^\}\{;]+?)\s*?)\{.*?\}/m, offset)
+        while pos = index(CSS_CONSTRUCTION_RE, offset)
           pos += $1.size # <- getting the actual block position
-          block = find_block("{}", pos, src)
+          block = find_block("{}", pos)
           block = block[1, block.size-1]; pos+=1 # <- remove the container
           block_size = block.size
           
@@ -26,8 +28,8 @@ class FrontCompiler
 
           block_sub_styles = []
           
-          # looking for the nested constructions
-          while block_pos = block.index(/((\A|;|\})\s*?([^\}\{;]+?)\s*?)\{.*?\}/im)
+          # looking for a nested construction
+          while block_pos = block.index(CSS_CONSTRUCTION_RE)
             trail_char = $2.dup
             
             block_start = $1.dup
@@ -46,20 +48,19 @@ class FrontCompiler
             # getting the construction body
             block_body = find_block("{}", block_pos + block_start_size, block)
             
-            # removing the construction out of the body
+            # removing the construction out of the block
             block[block_pos, block_start_size + block_body.size] = ''
             block_sub_styles << block_start + block_body
           end
           
           # replacing the block
-          src[pos, block_size] = block + block_sub_styles.join('')
+          self[pos, block_size] = block + block_sub_styles.join('')
           
           offset = pos + block.size - 1
         end
-        
-        src
       end
       
+    protected  
       # creates a clean css-rules list out of the str
       def clean_rules_from(str)
         str.split(',').collect{ |rule|

@@ -9,26 +9,28 @@ class FrontCompiler::SourceCode < String
   end
   
   # returns a fully compacted source
-  def compact
-    remove_comments.
-      remove_empty_lines.
-      remove_trailing_spaces
+  def compact!
+    remove_comments!.
+      remove_empty_lines!.
+      remove_trailing_spaces!
   end
   
   # removes any comments
-  def remove_comments
+  def remove_comments!
     self
   end
   
   # removes empty lines
-  def remove_empty_lines
+  def remove_empty_lines!
     self
   end
   
   # removes all the trailing spaces
-  def remove_trailing_spaces
+  def remove_trailing_spaces!
     self
   end
+  
+  alias :compact :compact!
 
 protected
   # executes the given block, safely for the strings declared in the source-code

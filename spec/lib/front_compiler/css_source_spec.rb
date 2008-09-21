@@ -20,7 +20,7 @@ describe FrontCompiler::CssSource do
       a:after {
         content: '/* */';
       }
-    }).remove_comments.should == %{
+    }).remove_comments!.should == %{
       
       html, body { 
         font-size: 9pt;
@@ -54,7 +54,7 @@ describe FrontCompiler::CssSource do
         display: block;
       }
 
-    }).remove_empty_lines.should == %{
+    }).remove_empty_lines!.should == %{
       html, body {
         font-weight: bold;
         color: red;
@@ -81,7 +81,7 @@ describe FrontCompiler::CssSource do
       form p label { 
         display: block;
       }
-    }).remove_trailing_spaces.should == ""\
+    }).remove_trailing_spaces!.should == ""\
     "html,body{cusor:pointer;color:red}div>p~label:after{"\
     "content:'           ';text-decoration:underline}"\
     "form p label{display:block}"
@@ -92,7 +92,7 @@ describe FrontCompiler::CssSource do
       /* some comment */
       div           ,
       p {         padding: 10pt; }
-    }).compact.should == %{div,p{padding:10pt}}
+    }).compact!.should == %{div,p{padding:10pt}}
   end
   
   it "should convert the stylesheet into a embedded javascript code" do 

@@ -9,18 +9,18 @@ describe FrontCompiler::SourceCode do
   end
   
   it do 
-    @src.should respond_to(:compact)
+    @src.should respond_to(:compact!)
   end
   
   it do 
-    @src.should respond_to(:remove_comments)
+    @src.should respond_to(:remove_comments!)
   end
   
   it do 
-    @src.should respond_to(:remove_empty_lines)
+    @src.should respond_to(:remove_empty_lines!)
   end
   
   it do 
-    @src.should respond_to(:remove_trailing_spaces)
+    @src.should respond_to(:remove_trailing_spaces!)
   end
 end

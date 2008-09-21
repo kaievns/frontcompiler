@@ -13,9 +13,9 @@ class FrontCompiler
       #
       # checks and compacts the script-logic
       #
-      def compact_logic
+      def compact_logic!
         string_safely do 
-          join_multiline_defs
+          join_multiline_defs!
           simplify_constructions_of self
         end
       end
@@ -26,7 +26,7 @@ class FrontCompiler
       #
       MULTILINING_CHARS_RE = %w{ ? : = - + * / % ! & | < > , 
       }.collect{ |c| Regexp.escape(c)}.join("|")
-      def join_multiline_defs
+      def join_multiline_defs!
         gsub!(/\s+(#{MULTILINING_CHARS_RE})\s+/m, ' \1 ')
         gsub!(/\s+(#{MULTILINING_CHARS_RE})(\S)/m, ' \1\2')
         gsub!(/(\S)(#{MULTILINING_CHARS_RE})\s+/m, '\1\2 ')

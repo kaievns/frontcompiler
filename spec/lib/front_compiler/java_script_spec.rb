@@ -12,7 +12,7 @@ describe FrontCompiler::JavaScript do
        */
       var bla = // bla bla bla
         "bla // bla /* bla */";
-    }).remove_comments.should == %{
+    }).remove_comments!.should == %{
       
       var bla = 
         "bla // bla /* bla */";
@@ -27,7 +27,7 @@ describe FrontCompiler::JavaScript do
 
 
 
-    }).remove_empty_lines.should == %{
+    }).remove_empty_lines!.should == %{
       var str1 = "asdfsdf \\n\\n\\n asd";
       var str2 = 'asdfasdf';
     }
@@ -41,7 +41,7 @@ describe FrontCompiler::JavaScript do
           bla_bla  / bla_bla_bla * sdfsd - asfasdf
         );
       }
-    }).remove_trailing_spaces.should == "" \
+    }).remove_trailing_spaces!.should == "" \
       "for(var bla=\"asdf + asdf\";bla.match(/sdfsdf [ ]/);[sdfsdf % sdf]){" \
         "bla(bla(bla,bla),bla_bla/bla_bla_bla*sdfsd-asfasdf)}"
   end
@@ -51,7 +51,7 @@ describe FrontCompiler::JavaScript do
       var str = "asdf \\\\ \\n /* asdf */";
       var str = /\\D/;
       var str = '\\D';
-    }).remove_comments.should == %{
+    }).remove_comments!.should == %{
       var str = "asdf \\\\ \\n /* asdf */";
       var str = /\\D/;
       var str = '\\D';
