@@ -2,7 +2,7 @@ require File.dirname(__FILE__)+"/../../spec_helper"
 
 describe FrontCompiler::CssSource do
   def css(src)
-   FrontCompiler::CssSource.new(src)
+    FrontCompiler::CssSource.new(src)
   end
   
   it "should remove comments" do 
@@ -108,41 +108,4 @@ describe FrontCompiler::CssSource do
         'div,p{padding:10pt;background:url(\'something\');content:\"something\"}'+
       '</style>");'
   end
-=begin
-  it "should convert nested constructions" do 
-    css(%{
-      div.stuff {
-        border: 1px solid #EEE;
-
-        div.name {
-          font-weight: bold;
-
-          div.id:before {
-            content: '#';
-          }
-        }
-        
-        div.name, div.text {
-          padding: 10pt;
-        }
-      }
-    }).should == %{
-      div.stuff {
-        border: 1px solid #EEE;
-
-      }
-        div.stuff div.name {
-          font-weight: bold;
-
-        }
-          div.stuff div.name div.id:before {
-            content: '#';
-          }
-        
-        div.stuff div.name, div.stuff div.text {
-          padding: 10pt;
-        }
-    }
-  end
-=end
 end

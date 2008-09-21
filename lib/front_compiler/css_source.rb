@@ -3,9 +3,10 @@
 #
 # Copyright (C) Nikolay V. Nemshilov aka St.
 #
-require "front_compiler/css_source/nesting"
+require "front_compiler/css_source/nested_styles"
+
 class FrontCompiler::CssSource < FrontCompiler::SourceCode
-  include Nesting
+  include NestedStyles
   
   # removes all the comments out of the given source
   def remove_comments
