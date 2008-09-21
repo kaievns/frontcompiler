@@ -35,7 +35,6 @@ or you can compact several files at once like that
 
 Same for the other file-types
 
-
 CSS Inlining
 ============
 
@@ -60,6 +59,45 @@ and the application stylesheets in one.
 
 NOTE: if the user have JavaScript switched off, then he won't see the
 styles.
+
+Nested CSS Handling
+===================
+
+Nested CSS is a feature when you describe your css with nested constructions
+like that
+
+div.article {
+  div.title {
+    font-weight: bold;
+    span.date {
+      color: pink;
+    }
+  }
+  div.text {
+    background: #EEE;
+  }
+}
+
+Which means the same as the following code.
+
+div.article div.title {
+  font-weight: bold;
+}
+div.article div.title span.date {
+  color: pink
+}
+div.article div.text {
+  background: #EEE;
+}
+
+Nested styles are more clean, simple and follows the DRY principle. The only
+little problem, there's no browsers which support the feature yet. But the idea
+is alive and people like it. So we have added the feature emulation in the
+project.
+
+You can create nested css descriptions and then when you compress your css
+with FrontCompiler, it will be automatically converted in a correct css source
+which the browsers can understand.
 
 
 Rails Usage
