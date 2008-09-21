@@ -9,7 +9,6 @@ class FrontCompiler
   VERSION = "0.1"
   
   def initialize
-    @css_compactor = CSSCompactor.new
     @html_compactor = HTMLCompactor.new
   end
   
@@ -40,7 +39,7 @@ class FrontCompiler
   
   # compacts a CSS source code
   def compact_css(source)
-    @css_compactor.minimize(source)
+    CssSource.new(source).compact
   end
   
   # compacts a HTML code
@@ -50,11 +49,11 @@ class FrontCompiler
   
   # inlines the css-sourcecode in a javascript code
   def inline_css(source)
-    @css_compactor.to_javascript(source)
+    CssSource.new(source).to_javascript
   end
 end
 
 require "front_compiler/source_code"
 require "front_compiler/java_script"
-require "front_compiler/css_compactor"
+require "front_compiler/css_source"
 require "front_compiler/html_compactor"
