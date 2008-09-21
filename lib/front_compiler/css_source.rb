@@ -3,7 +3,10 @@
 #
 # Copyright (C) Nikolay V. Nemshilov aka St.
 #
+require "front_compiler/css_source/nesting"
 class FrontCompiler::CssSource < FrontCompiler::SourceCode
+  include Nesting
+  
   # removes all the comments out of the given source
   def remove_comments
     string_safely do 
@@ -34,33 +37,5 @@ class FrontCompiler::CssSource < FrontCompiler::SourceCode
     "document.write(\"<style type=\\\"text/css\\\">#{
        compact.gsub('"', '\"')
      }</style>\");"
-  end
-  
-protected
-  # escapes all the strings defined in the source
-  # and get everything back after processing
-  # to keep the strings safe
-  def string_safely
-    outtakes = []
-    
-    gsub!(/('|").*?[^\\](\1)/) do |match|
-      replacement = "sfTEEg$%#{outtakes.length}$%riPlOcImEnt"
-      outtakes << { 
-        :replacement => replacement, 
-        :original    => match.to_s
-      }
-      
-      replacement
-    end
-    
-    # running the handler
-    yield
-    
-    # bgingin the strings back
-    outtakes.reverse.each do |s|
-      gsub! s[:replacement], s[:original].gsub('\\','\\\\\\\\')
-    end
-    
-    self
   end
 end
