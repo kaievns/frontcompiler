@@ -5,9 +5,10 @@
 #
 require "front_compiler/java_script/logic_compactor"
 require "front_compiler/java_script/names_compactor"
+require "front_compiler/java_script/self_builder"
 
 class FrontCompiler::JavaScript < FrontCompiler::SourceCode
-  include LogicCompactor, NamesCompactor
+  include LogicCompactor, NamesCompactor, SelfBuilder
   
   def compact!
     string_safely do 
@@ -17,6 +18,7 @@ class FrontCompiler::JavaScript < FrontCompiler::SourceCode
         remove_empty_lines!.
         remove_trailing_spaces!
     end
+    #create_self_build
   end
   
   def remove_comments!

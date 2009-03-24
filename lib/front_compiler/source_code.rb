@@ -30,7 +30,10 @@ class FrontCompiler::SourceCode < String
     self
   end
   
-  alias :compact :compact!
+  # don't use alias here, it won't work with subclasses
+  def compact
+    compact!
+  end
 
 protected
   # executes the given block, safely for the strings declared in the source-code
