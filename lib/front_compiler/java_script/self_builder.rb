@@ -22,13 +22,13 @@ class FrontCompiler
       
       def create_build_script(source, names_map)
         "eval((function(){"+
-          "var s=function(){#{source}}.toString().replace(/^\\s*function\\s*\\(\\)\\s*\{/,'').replace(/\\}\\s*;?\\s*$/,'');"+
-          "var d={#{names_map.collect{ |k, v| "#{k}:\"#{v}\"" }.join(',')}};"+
+          "var s=\"#{source.gsub("\\", "\\\\\\\\").gsub("\n", '\\n').gsub('"', '\"').gsub('\\\'', '\\\\\\\\\'')}\","+
+          "d={#{names_map.collect{ |k, v| "#{k}:\"#{v}\"" }.join(',')}};"+
           "for(var k in d)"+
             "s=s.replace(new RegExp('((\\\\{|,)\\\\s*)'+k+'(\\\\s*:)','g'),'$1'+d[k]+'$3')"+
                ".replace(new RegExp('(\\\\.)'+k+'([^a-zA-Z0-9_\\\\$\\\\-])','g'),'$1'+d[k]+'$2');"+
-          "return s;"+
-        "}()));"
+          "return s"+
+        "})());"
       end
       
       def compact_hashes_in(string)

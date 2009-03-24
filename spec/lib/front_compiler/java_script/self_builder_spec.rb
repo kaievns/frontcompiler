@@ -140,22 +140,13 @@ describe FrontCompiler::JavaScript::SelfBuilder do
   it "should create a correct rebuild script" do
     build(%{
       var hash = {
-        first : 1,
-        second: 2,
-        third : 3,
+        first : '1',
+        second: "2",
+        third : /3/,
         common: function() {
           hash.first.second().third
         }
       }
-    }).should == %[eval((function(){var s=function(){
-      var hash = {
-        f : 1,
-        s: 2,
-        t : 3,
-        c: function() {
-          hash.f.s().t
-        }
-      }
-    }.toString().replace(/^\\s*function\\s*\\(\\)\\s*{/,'').replace(/\\}\\s*;?\\s*$/,'');var d={c:"common",f:"first",s:"second",t:"third"};for(var k in d)s=s.replace(new RegExp('((\\\\{|,)\\\\s*)'+k+'(\\\\s*:)','g'),'$1'+d[k]+'$3').replace(new RegExp('(\\\\.)'+k+'([^a-zA-Z0-9_\\\\$\\\\-])','g'),'$1'+d[k]+'$2');return s;}()));]
+    }).should == %[eval((function(){var s="\\n      var hash = {\\n        f : '1',\\n        s: \\\"2\\\",\\n        t : /3/,\\n        c: function() {\\n          hash.f.s().t\\n        }\\n      }\\n    ",d={c:"common",f:"first",s:"second",t:"third"};for(var k in d)s=s.replace(new RegExp('((\\\\{|,)\\\\s*)'+k+'(\\\\s*:)','g'),'$1'+d[k]+'$3').replace(new RegExp('(\\\\.)'+k+'([^a-zA-Z0-9_\\\\$\\\\-])','g'),'$1'+d[k]+'$2');return s})());]
   end
 end
