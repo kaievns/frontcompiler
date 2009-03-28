@@ -137,6 +137,32 @@ describe FrontCompiler::JavaScript::SelfBuilder do
     }
   end
   
+  it "should not replace native keys if they present less then three times" do
+    FrontCompiler::JavaScript::SelfBuilder::JS_NATIVE_KEYS.each do |key|
+      compact(%{
+        var something = element.#{key};
+        var another   = something.#{key};
+      }).should ==   %{
+        var something = element.#{key};
+        var another   = something.#{key};
+      }
+    end
+  end
+  
+  it "should replace native keys if they present in the script more than twice" do
+    FrontCompiler::JavaScript::SelfBuilder::JS_NATIVE_KEYS.each do |key|
+      compact(%{
+        var something = element.#{key};
+        var another   = something.#{key};
+        var more      = another.#{key};
+      }).should ==   %{
+        var something = element.#{key.slice(0,1)};
+        var another   = something.#{key.slice(0,1)};
+        var more      = another.#{key.slice(0,1)};
+      }
+    end
+  end
+  
   it "should create a correct rebuild script" do
     build(%{
       var hash = {
@@ -147,6 +173,6 @@ describe FrontCompiler::JavaScript::SelfBuilder do
           hash.first.second().third
         }
       }
-    }).should == %[eval((function(){var s="\\n      var hash = {\\n        f : '1',\\n        s: \\\"2\\\",\\n        t : /3/,\\n        c: function() {\\n          hash.f.s().t\\n        }\\n      }\\n    ",d={c:"common",f:"first",s:"second",t:"third"};for(var k in d)s=s.replace(new RegExp('((\\\\{|,)\\\\s*)'+k+'(\\\\s*:)','g'),'$1'+d[k]+'$3').replace(new RegExp('(\\\\.)'+k+'([^a-zA-Z0-9_\\\\$\\\\-])','g'),'$1'+d[k]+'$2');return s})());]
+    }).should == %[eval((function(){var s="\\n      var hash = {\\n        f : '1',\\n        s: \\\"2\\\",\\n        t : /3/,\\n        c: function() {\\n          hash.f.s().t\\n        }\\n      }\\n    ",d={c:"common",f:"first",s:"second",t:"third"};for(var k in d)s=s.replace(new RegExp('((\\\\{|,)\\\\s*)'+k+'(\\\\s*:)','g'),'$1'+d[k]+'$3').replace(new RegExp('(\\\\.)'+k+'([^a-zA-Z0-9_\\\\$])','g'),'$1'+d[k]+'$2');return s})());]
   end
 end
