@@ -2,7 +2,6 @@ require File.dirname(__FILE__)+"/../../../spec_helper"
 
 describe FrontCompiler::JavaScript::SelfBuilder do
   def compact(src)
-#    FrontCompiler::JavaScript::SelfBuilder::MINIMUM_NUMBER_OF_APPEARANCES = 2
     FrontCompiler::JavaScript.new(src).instance_eval do
       compact_hashes_in(self).first
     end
@@ -43,24 +42,24 @@ describe FrontCompiler::JavaScript::SelfBuilder do
       }
     }).should == %{
       var hash = {
-        @fi:  1,
-        @se: 2,
-        @th:  3,
-        @co: {
-          @fi:  1,
-          @se: 2,
-          @th:  3,
-          @co: {
-            @fi : 1,
-            @se: 2,
-            @th : 3,
-            @co: {
-              @fi : 1,
-              @se: 2,
-              @th : 3,
-              @co: function() {
-                var a = hash.@fi.@se.@th.@co();
-                var a = hash.@fi.@se.@th.@co();
+        @f:  1,
+        @s: 2,
+        @t:  3,
+        @c: {
+          @f:  1,
+          @s: 2,
+          @t:  3,
+          @c: {
+            @f : 1,
+            @s: 2,
+            @t : 3,
+            @c: {
+              @f : 1,
+              @s: 2,
+              @t : 3,
+              @c: function() {
+                var a = hash.@f.@s.@t.@c();
+                var a = hash.@f.@s.@t.@c();
                 var b = hash.firstsecond.thirdcopy();
               }
             }
@@ -89,11 +88,11 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         a: 1,
         b: 2,
         c: {
-          @av: {},
-          @be: {},
-          @co: function() {
-            hash.a.b.c.@av().@be.@co();
-            hash.a.b.c.@av().@be.@co();
+          @a: {},
+          @b: {},
+          @c: function() {
+            hash.a.b.c.@a().@b.@c();
+            hash.a.b.c.@a().@b.@c();
           }
         }
       }
@@ -113,12 +112,12 @@ describe FrontCompiler::JavaScript::SelfBuilder do
       }
     }).should == %{
       var hash = {
-        @fi : 1,
-        @se: 2,
-        @th : function() {
+        @f : 1,
+        @s: 2,
+        @t : function() {
           var hash = hash.f.s.t();
-          var hash = hash.@fi.@se.@th();
-          var hash = hash.@fi.@se.@th();
+          var hash = hash.@f.@s.@t();
+          var hash = hash.@f.@s.@t();
         }
       }
     }
@@ -136,11 +135,11 @@ describe FrontCompiler::JavaScript::SelfBuilder do
       }
     }).should == %{
       var hash = {
-        @ca: 1,
-        @cA: 2,
-        @aa: function() {
-          var camel = hash.@ca.@cA().@aa;
-          var camel = hash.@ca.@cA().@aa;
+        @c: 1,
+        @a: 2,
+        @b: function() {
+          var camel = hash.@c.@a().@b;
+          var camel = hash.@c.@a().@b;
         }
       }
     }
@@ -163,8 +162,8 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         var something = element.#{key};
         var another   = something.#{key};
       }).should ==   %{
-        var something = element.@#{key.slice(0,2)};
-        var another   = something.@#{key.slice(0,2)};
+        var something = element.@#{key.slice(0,1)};
+        var another   = something.@#{key.slice(0,1)};
       }
     end
   end
@@ -204,16 +203,16 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       };
     }).should == %{
-      var function = @fu() {
-        @sw () {
-          @wh () {
+      var function = @f() {
+        @s () {
+          @w () {
             do();
           }
         }
       };
-      var function = @fu name() {
-        @sw () {
-          @wh () {
+      var function = @f name() {
+        @s () {
+          @w () {
             do();
           }
         }
@@ -234,8 +233,8 @@ describe FrontCompiler::JavaScript::SelfBuilder do
       return bla;
       return bla;
     }).should == %{
-      @re bla;
-      @re bla;
+      @r bla;
+      @r bla;
     }
   end
   
@@ -252,8 +251,8 @@ describe FrontCompiler::JavaScript::SelfBuilder do
       Object.bla;
       Object.bla;
     }).should == %{
-      @Ob.bla;
-      @Ob.bla;
+      @O.bla;
+      @O.bla;
     }
   end
   
@@ -264,9 +263,10 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         second: "2",
         third : /3/,
         common: function() {
-          hash.first.second().third
+          hash.first.second().third;
+          hash.first.second().third;
         }
       }
-    }).should == "eval((function(){var s=\"\\n      var hash = {\\n        first : '1',\\n        second: \\\"2\\\",\\n        third : /3/,\\n        common: function() {\\n          hash.first.second().third\\n        }\\n      }\\n    \",d={};for(var k in d)s=s.replace(new RegExp('@'+k,'g'),d[k]);return s})());"
+    }).should == "eval((function(){var s=\"\\n      var hash = {\\n        @f : '1',\\n        @s: \\\"2\\\",\\n        @t : /3/,\\n        common: function() {\\n          hash.@f.@s().@t;\\n          hash.@f.@s().@t;\\n        }\\n      }\\n    \",d={f:\"first\",s:\"second\",t:\"third\"};for(var k in d)s=s.replace(new RegExp('@'+k+'([^a-zA-Z_$])','g'),d[k]+'$1');return s})());"
   end
 end

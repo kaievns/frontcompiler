@@ -29,7 +29,7 @@ class FrontCompiler
             
           # building the postprocessing script
           "for(var k in d)"+
-            "s=s.replace(new RegExp('#{REPLACEMENTS_PREFIX}'+k,'g'),d[k]);"+
+            "s=s.replace(new RegExp('#{REPLACEMENTS_PREFIX}'+k+'([^a-zA-Z_$])','g'),d[k]+'$1');"+
           
           "return s"+
         "})());"
@@ -37,10 +37,10 @@ class FrontCompiler
       
       def compact_hashes_in(string)
         compress_string(string, [
-          [:guess_names_map_for, :js_hash_key_re, :js_hash_use_re],
           [:guess_structs_map_for, :js_structs_re],
+          [:guess_objects_map_for, :js_objects_re],
           [:guess_commands_map_for, :js_commands_re],
-          [:guess_objects_map_for, :js_objects_re]
+          [:guess_names_map_for, :js_hash_key_re, :js_hash_use_re],
         ])
       end
       
@@ -126,7 +126,7 @@ class FrontCompiler
       def guess_replacements_map(string, keys, &block)
         map = {}
         keys.each do |old_name|
-          new_name = old_name[/[a-z]{2}/i] || 'aa'
+          new_name = old_name[/[a-z]/i] || 'a'
           
           while map.has_key?(new_name) or string.match(/#{REPLACEMENTS_PREFIX}#{new_name}/)
             new_name = REPLACEMENTS.shift
@@ -141,7 +141,7 @@ class FrontCompiler
         map
       end
       
-      REPLACEMENTS = [2].collect{|i| ('a'*i..'z'*i).to_a + ('A'*i..'Z'*i).to_a}.flatten.sort_by(&:size)
+      REPLACEMENTS = (1..3).collect{|i| ('a'*i..'z'*i).to_a + ('A'*i..'Z'*i).to_a}.flatten.sort_by(&:size)
       REPLACEMENTS_PREFIX = '@'
       
       #
