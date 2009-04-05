@@ -14,8 +14,9 @@ class FrontCompiler
       # checks and compacts the script-logic
       #
       def compact_logic!
-        string_safely do 
+        string_safely do
           join_multiline_defs!
+          fix_missed_semicolons!
           simplify_constructions_of self
         end
       end
@@ -119,6 +120,16 @@ class FrontCompiler
       src.gsub!(/(\A\s*function\s*.*?\(.*?\)\s*\{.*?\});(\s*\Z)/im) do
         $1 + $2
       end
+    end
+    
+    def fix_missed_semicolons!
+      gsub! /([^{}()|&;:=,\s])([ \t]*?\n\s*?(return|if|function|while|try|do)[^a-zA-Z_$])/, '\1;\2'
+      
+      # (function(){....})(..) if(...)
+      gsub! /(\}\)\([^)]*\))([ \t]*?\n\s*?(return|if|function|while|try|do)[^a-zA-Z_$])/, '\1;\2'
+      
+      # fixing wrong added semicolons before the if calls
+      gsub! /([^a-zA-Z_$](else|do));(\s+(if|while|do|try)[^a-zA-Z_$])/, '\1\3'
     end
   end
 end

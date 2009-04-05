@@ -300,4 +300,51 @@ describe FrontCompiler::JavaScript::LogicCompactor do
       }
     }
   end
+  
+  it "should fix missed semicolons before return|function|if|while|do" do
+    %w(return function if while do try).each do |command|
+      compact(%{
+        var a = 2
+        #{command};
+        var b = 4;
+        #{command};
+      }).should == %{
+        var a = 2;
+        #{command};
+        var b = 4;
+        #{command};
+      }
+    end
+  end
+  
+  it "should fix temporary lambdas calls" do
+    %w(return function if while do try).each do |command|
+      compact(%{
+        var c = (function() {
+
+        })(1,2,3,4)
+        #{command} (c)
+      }).should == %(
+        var c = (function() {
+
+        })(1,2,3,4);
+        #{command} (c)
+      )
+    end
+    
+  end
+  
+  it "should not break weird else if constructions" do
+    compact(%{
+      if(somethind) {
+      } else
+      if (another) {
+      }
+    }).should == %{
+      if(somethind) {
+      } else
+      if (another) {
+      }
+    }
+  end
 end
