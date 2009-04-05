@@ -11,7 +11,7 @@ class FrontCompiler
     module SelfBuilder
       def create_self_build
         rehashed_version = process_hashes_in(self)
-#        rehashed_version.size > self.size ? self : rehashed_version
+        rehashed_version.size > self.size ? self : rehashed_version
       end
       
     protected
@@ -20,116 +20,64 @@ class FrontCompiler
         create_build_script *compact_hashes_in(string)
       end
       
-      def create_build_script(source, maps)
+      def create_build_script(source, names_map)
         "eval((function(){"+
           "var s=\"#{source.gsub("\\", "\\\\\\\\").gsub("\n", '\\n').gsub('"', '\"').gsub('\\\'', '\\\\\\\\\'')}\","+
           
           # building the replacements data
-          "d={#{maps.collect{ |k, v| "#{k}:\"#{v}\"" }.join(',')}};"+
+          "d=\"#{names_map.collect{ |k, v| "#{k}:#{v}" }.join(',')}\".split(\",\");"+
             
           # building the postprocessing script
-          "for(var k in d)"+
-            "s=s.replace(new RegExp('#{REPLACEMENTS_PREFIX}'+k+'([^a-zA-Z_$])','g'),d[k]+'$1');"+
+          "for(var i=0;i<d.length;i++){p=d[i].split(\":\");"+
+            "s=s.replace(new RegExp('#{REPLACEMENTS_PREFIX}'+p[0]+'([^a-zA-Z0-9_$])','g'),p[1]+'$1');}"+
           
           "return s"+
         "})());"
       end
       
       def compact_hashes_in(string)
-        compress_string(string, [
-          [:guess_structs_map_for, :js_structs_re],
-          [:guess_objects_map_for, :js_objects_re],
-          [:guess_commands_map_for, :js_commands_re],
-          [:guess_names_map_for, :js_hash_key_re, :js_hash_use_re],
-        ])
-      end
-      
-      #
-      # Guesses the names map to shortify hashes keys in the source code
-      #
-      def guess_names_map_for(string)
-        keys = string.scan(/(\{|,)\s*([a-z_\$][a-z0-9_\$]+)\s*:/i).collect(&:last).collect(&:to_s)
-        keys = worth_of_replace(keys+JS_NATIVE_KEYS, string){|name| js_hash_use_re(name)}
+        string = string.dup
         
-        guess_replacements_map(string, keys.uniq) do |name|
-          [js_hash_key_re(name), js_hash_use_re(name)]
+        names_map = guess_replacements_map(string, tokens_to_replace_in(string))
+        names_map.each do |new_name, old_name|
+          string.gsub! /([^a-zA-Z0-9_\$])#{old_name}([^a-zA-Z0-9_\$])/ do
+            $1 + REPLACEMENTS_PREFIX + new_name + $2
+          end
         end
-      end
-      
-      def js_hash_key_re(name)
-        /([\{,]\s*)#{name}(\s*:)/
-      end
-      
-      def js_hash_use_re(name)
-        /(\.)#{name}([^a-zA-Z0-9_\$])/
-      end
-      
-      #
-      # Guesses the replacements map for the standard constructions like
-      #  function (), switch (), while ()
-      #
-      def guess_structs_map_for(string)
-        keys = worth_of_replace(JS_STRUCTS, string){|name| js_structs_re(name)}
         
-        guess_replacements_map(string, keys) do |name|
-          [js_structs_re(name)]
-        end
+        [string, names_map]
       end
       
-      def js_structs_re(name)
-        /([^a-zA-Z0-9_\$])#{name}((\s*|(\s+[a-zA-Z0-9_\$]+\s*))\()/
-      end
-      
-      #
-      # guesses the replacements map for the commands like return, throw, catc etc.
-      #
-      def guess_commands_map_for(string)
-        keys = worth_of_replace(JS_COMMANDS, string) {|name| js_commands_re(name)}
+      def tokens_to_replace_in(string)
+        keys = {}
         
-        guess_replacements_map(string, keys) do |name|
-          [js_commands_re(name)]
+        # getting the list of all the tokens of a good size
+        string.scan(/(?![^a-z0-9_$])([a-z0-9_$]{#{MINUMUM_REPLACEABLE_TOKEN_SIZE},88})(?![a-z0-9_$])/i
+        ).collect(&:last).each do |key|
+          keys[key] ||= 0
+          keys[key] +=  1
         end
-      end
-      
-      def js_commands_re(name)
-        /([^a-zA-Z0-9_\$])#{name}([^a-zA-Z0-9_\$])/
-      end
-      
-      
-      #
-      # guesses the replacements map for the javascript often used objects
-      #
-      def guess_objects_map_for(string)
-        keys = worth_of_replace(JS_OBJECTS, string){ |name| js_objects_re(name) }
         
-        guess_replacements_map(string, keys) do |name|
-          [js_objects_re(name)]
+        # filtering by the number of its appearances in the code
+        keys.reject! do |key, number|
+          number < self.class.minum_number_of_entry_appearances
         end
-      end
-      
-      def js_objects_re(name)
-        /([^a-zA-Z0-9_\$])#{name}(\.)/
-      end
-      
-      #
-      # checks which of the given keys are used enough to be compressed
-      #
-      def worth_of_replace(keys, string, &block)
-        keys.select do |name|
-          string.scan(yield(name)).size >= MINIMUM_NUMBER_OF_APPEARANCES
-        end
+        
+        # converting the list to an array of tokens ordered by the number of appearances
+        keys.collect{|k,v| m={}; m[v] = k; m}.sort{|a,b| b.first <=> a.first}.collect(&:values).collect(&:first)
       end
       
       #
       # Generic replacements quessing method
       #
-      def guess_replacements_map(string, keys, &block)
+      def guess_replacements_map(string, keys)
+        replacements = REPLACEMENTS_CHARS + REPLACEMENTS_CHARS.collect{|c| REPLACEMENTS_CHARS.collect{|a| c+a}}.flatten
         map = {}
         keys.each do |old_name|
           new_name = old_name[/[a-z]/i] || 'a'
           
           while map.has_key?(new_name) or string.match(/#{REPLACEMENTS_PREFIX}#{new_name}/)
-            new_name = REPLACEMENTS.shift
+            new_name = replacements.shift
             break if new_name.nil? # <- safety break if no possible match found
           end
           
@@ -141,68 +89,26 @@ class FrontCompiler
         map
       end
       
-      REPLACEMENTS = (1..3).collect{|i| ('a'*i..'z'*i).to_a + ('A'*i..'Z'*i).to_a}.flatten.sort_by(&:size)
-      REPLACEMENTS_PREFIX = '@'
-      
-      #
-      # Handles the source code remaping
-      #
-      def compress_string(string, replacements)
-        string = string.dup
-        maps = {}
-        
-        replacements.each do |options|
-          map = send(options.shift, string)
-          map.each do |new_name, old_name|
-            options.each do |re_method|
-              string.gsub! send(re_method, old_name) do
-                $1 + REPLACEMENTS_PREFIX + new_name + $2
-              end
-            end
-          end
-          
-          maps.merge!(map)
+    public
+      module ClassMethods
+        def minum_number_of_entry_appearances
+          @@minum_number_of_entry_appearances ||= MINIMUM_NUMBER_OF_APPEARANCES
         end
-        
-        [string, maps]
+
+        def minum_number_of_entry_appearances=(number)
+          @@minum_number_of_entry_appearances = number
+        end
       end
       
-    public
+      def self.included(base)
+        base.instance_eval{ extend ClassMethods }
+      end
+    
+      REPLACEMENTS_PREFIX = '@'
+      REPLACEMENTS_CHARS  = ('a'..'z').to_a + ('A'..'Z').to_a
       
-      MINIMUM_NUMBER_OF_APPEARANCES = 2
-      
-      JS_NATIVE_KEYS = %w(
-        prototype constructor apply call userAgent toString toSource
-        push pop shift unshift length indexOf lastIndexOf select split slice
-        setTimeout setInterval clearTimeout clearInterval
-        floor ceil round random
-        test match replace toLowerCase toUpperCase substr substring charAt charCodeAt fromCharCode
-        parentNode firstChild lastChild childNodes nextSibling previousSibling
-        nodeType nodeValue tagName appendChild insertBefore replaceChild removeChild
-        createElement createTextNode createDocumentFragment 
-        getElementById getElementsByTagName
-        document body parent opener window
-        attachEvent addEventListener
-        detachEvent removeEventListener
-        getAttribute setAttribute removeAttribute
-        offsetHeight offsetWidth offsetTop
-        checked disabled selected
-        name type title value innerHTML responseText responseXML
-        style display className defaultView
-      ).freeze
-      
-      JS_STRUCTS = %w(
-        function switch while
-      ).freeze
-      
-      JS_COMMANDS = %w(
-        return break continue default true false catch finally throw arguments case instanceof typeof
-        encodeURIComponent decodeURIComponent escape unescape null
-      ).freeze
-      
-      JS_OBJECTS = %w(
-        document window this self navigator Object String Array Date RegExp Element Prototype
-      ).freeze
+      MINUMUM_REPLACEABLE_TOKEN_SIZE = 4
+      MINIMUM_NUMBER_OF_APPEARANCES  = 8
     end
   end 
 end

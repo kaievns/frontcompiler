@@ -1,14 +1,19 @@
 require File.dirname(__FILE__)+"/../../../spec_helper"
 
 describe FrontCompiler::JavaScript::SelfBuilder do
+  def new_script(src)
+    FrontCompiler::JavaScript.minum_number_of_entry_appearances = 2
+    FrontCompiler::JavaScript.new(src)
+  end
+  
   def compact(src)
-    FrontCompiler::JavaScript.new(src).instance_eval do
+    new_script(src).instance_eval do
       compact_hashes_in(self).first
     end
   end
   
   def build(src)
-    FrontCompiler::JavaScript.new(src).instance_eval do
+    new_script(src).instance_eval do
       process_hashes_in self
     end
   end
@@ -41,7 +46,7 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var hash = {
+      var @h = {
         @f:  1,
         @s: 2,
         @t:  3,
@@ -58,9 +63,9 @@ describe FrontCompiler::JavaScript::SelfBuilder do
               @s: 2,
               @t : 3,
               @c: function() {
-                var a = hash.@f.@s.@t.@c();
-                var a = hash.@f.@s.@t.@c();
-                var b = hash.firstsecond.thirdcopy();
+                var a = @h.@f.@s.@t.@c();
+                var a = @h.@f.@s.@t.@c();
+                var b = @h.firstsecond.thirdcopy();
               }
             }
           }
@@ -84,15 +89,15 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var hash = {
+      var @h = {
         a: 1,
         b: 2,
         c: {
           @a: {},
           @b: {},
           @c: function() {
-            hash.a.b.c.@a().@b.@c();
-            hash.a.b.c.@a().@b.@c();
+            @h.a.b.c.@a().@b.@c();
+            @h.a.b.c.@a().@b.@c();
           }
         }
       }
@@ -111,13 +116,13 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var hash = {
+      var @h = {
         @f : 1,
         @s: 2,
         @t : function() {
-          var hash = hash.f.s.t();
-          var hash = hash.@f.@s.@t();
-          var hash = hash.@f.@s.@t();
+          var @h = @h.f.s.t();
+          var @h = @h.@f.@s.@t();
+          var @h = @h.@f.@s.@t();
         }
       }
     }
@@ -134,38 +139,15 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var hash = {
+      var @h = {
         @c: 1,
-        @a: 2,
-        @b: function() {
-          var camel = hash.@c.@a().@b;
-          var camel = hash.@c.@a().@b;
+        @b: 2,
+        @a: function() {
+          var @c = @h.@c.@b().@a;
+          var @c = @h.@c.@b().@a;
         }
       }
     }
-  end
-  
-  it "should not replace native keys if they present less then twice" do
-    
-    FrontCompiler::JavaScript::SelfBuilder::JS_NATIVE_KEYS.each do |key|
-      compact(%{
-        var something = element.#{key};
-      }).should ==   %{
-        var something = element.#{key};
-      }
-    end
-  end
-  
-  it "should replace native keys if they present in the script more than once" do
-    FrontCompiler::JavaScript::SelfBuilder::JS_NATIVE_KEYS.each do |key|
-      compact(%{
-        var something = element.#{key};
-        var another   = something.#{key};
-      }).should ==   %{
-        var something = element.@#{key.slice(0,1)};
-        var another   = something.@#{key.slice(0,1)};
-      }
-    end
   end
   
   it "should not touch the standard constructions if they are present less then twice" do
@@ -203,14 +185,14 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       };
     }).should == %{
-      var function = @f() {
+      var @f = @f() {
         @s () {
           @w () {
             do();
           }
         }
       };
-      var function = @f name() {
+      var @f = @f name() {
         @s () {
           @w () {
             do();
@@ -267,6 +249,6 @@ describe FrontCompiler::JavaScript::SelfBuilder do
           hash.first.second().third;
         }
       }
-    }).should == "eval((function(){var s=\"\\n      var hash = {\\n        @f : '1',\\n        @s: \\\"2\\\",\\n        @t : /3/,\\n        common: function() {\\n          hash.@f.@s().@t;\\n          hash.@f.@s().@t;\\n        }\\n      }\\n    \",d={f:\"first\",s:\"second\",t:\"third\"};for(var k in d)s=s.replace(new RegExp('@'+k+'([^a-zA-Z_$])','g'),d[k]+'$1');return s})());"
+    }).should == "eval((function(){var s=\"\\n      var @h = {\\n        @f : '1',\\n        @s: \\\"2\\\",\\n        @t : /3/,\\n        common: function() {\\n          @h.@f.@s().@t;\\n          @h.@f.@s().@t;\\n        }\\n      }\\n    \",d=\"f:first,h:hash,s:second,t:third\".split(\",\");for(var i=0;i<d.length;i++){p=d[i].split(\":\");s=s.replace(new RegExp('@'+p[0]+'([^a-zA-Z0-9_$])','g'),p[1]+'$1');}return s})());"
   end
 end
