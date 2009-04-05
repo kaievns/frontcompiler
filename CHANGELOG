@@ -1,0 +1,6 @@
+* 1.0.0 (April 5, 2009) - Nikolay V. Nemshilov aka St.
+
+  * The Self-Build Feature was implemented
+  * Missed semicolons restoration feature added
+  * Documentation updates
+  * Tagged the source as version 1.0.0

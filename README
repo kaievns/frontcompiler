@@ -5,6 +5,9 @@ FrontCompiler is a simple collection of compactors for the JavaScript,
 CSS and HTML source code. It removes trailing whitespaces, comments and
 transformates the local variables to make the sourcecode shorter.
 
+For JavaScript, it can create a more compressed self-building script
+for your code, see the description below.
+
 The library can be used as a plugin for rails. See description below.
 
 
@@ -124,8 +127,34 @@ templates
                           source (can be a file-name)
 
 
+Self-Build Scripts
+==================
+
+FrontCompiler provides you another nice feature, the scripts self-building.
+The idea is that it will convert your code into a string, replace all long
+tokens by short replacements and then compile a javascript code which will
+replace all the tokens back on the user's browser side.
+
+This will give you extra 20-40% compression over the existing FrontCompiler
+compression.
+
+The browser side restoration happens pretty quick and almost invisible for
+the end user.
+
+As the feature actually change the code and requires the end script to be
+executed with JavaScript, it won't work if you use JSON as a media format
+without actual evaluating it as a javascript code. For this reason, to use
+the feature, you need to call it specifically.
+
+@c = FrontCompiler.new
+@c.compact_js(File.open('src/something.js', 'r')).create_self_build;
+
+If you want FrontCompiler to create self-builds by default you can just
+uncomment the call in the java_script.rb file.
+
+
 Enjoy!
 
 --
 The code released under terms of the MIT License
-Copyright (C) 2008 Nikolay V. Nemshilov aka St.
+Copyright (C) 2008-2009 Nikolay V. Nemshilov aka St.
