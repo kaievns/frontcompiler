@@ -40,7 +40,7 @@ class FrontCompiler
         
         names_map = guess_replacements_map(string, tokens_to_replace_in(string))
         names_map.each do |new_name, old_name|
-          string.gsub! /([^a-zA-Z0-9_\$])#{old_name}([^a-zA-Z0-9_\$])/ do
+          string.gsub! /(\A|[^a-zA-Z0-9_\$])#{old_name}([^a-zA-Z0-9_\$]|\Z)/ do
             $1 + REPLACEMENTS_PREFIX + new_name + $2
           end
         end
@@ -58,10 +58,25 @@ class FrontCompiler
           keys[key] +=  1
         end
         
+        #
         # filtering by the number of its appearances in the code
-        keys.reject! do |key, number|
-          number < self.class.minum_number_of_entry_appearances
+        # we're trying to negotiate the number of tokens to the
+        # maximum length of the dictionary
+        #
+        filtered_keys = nil
+        self.class.minum_number_of_entry_appearances.downto(2) do |maximum_number_of_appearances|
+          prev_filtered_keys = filtered_keys
+          
+          filtered_keys = keys.reject do |key, number|
+            number < maximum_number_of_appearances
+          end
+          
+          if filtered_keys.size > MAXIMUM_DICTIONARY_SIZE
+            filtered_keys = prev_filtered_keys if prev_filtered_keys
+            break
+          end
         end
+        keys = filtered_keys
         
         # converting the list to an array of tokens ordered by the number of appearances
         keys.collect{|k,v| m={}; m[v] = k; m}.sort{|a,b| b.first <=> a.first}.collect(&:values).collect(&:first)
@@ -109,6 +124,7 @@ class FrontCompiler
       
       MINUMUM_REPLACEABLE_TOKEN_SIZE = 4
       MINIMUM_NUMBER_OF_APPEARANCES  = 8
+      MAXIMUM_DICTIONARY_SIZE        = 200
     end
   end 
 end
