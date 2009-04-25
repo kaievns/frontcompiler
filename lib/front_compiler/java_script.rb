@@ -18,7 +18,6 @@ class FrontCompiler::JavaScript < FrontCompiler::SourceCode
         remove_empty_lines!.
         remove_trailing_spaces!
     end
-    #create_self_build
   end
   
   def remove_comments!
