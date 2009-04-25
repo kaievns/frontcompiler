@@ -2,7 +2,6 @@ require File.dirname(__FILE__)+"/../../../spec_helper"
 
 describe FrontCompiler::JavaScript::SelfBuilder do
   def new_script(src)
-    FrontCompiler::JavaScript.minum_number_of_entry_appearances = 2
     FrontCompiler::JavaScript.new(src)
   end
   
@@ -65,7 +64,7 @@ describe FrontCompiler::JavaScript::SelfBuilder do
               @c: function() {
                 var a = @h.@f.@s.@t.@c();
                 var a = @h.@f.@s.@t.@c();
-                var b = @h.firstsecond.thirdcopy();
+                var b = @h.@f@s.@t@c();
               }
             }
           }
@@ -249,6 +248,6 @@ describe FrontCompiler::JavaScript::SelfBuilder do
           hash.first.second().third;
         }
       }
-    }).should == "eval((function(){var s=\"\\n      var @h = {\\n        @f : '1',\\n        @s: \\\"2\\\",\\n        @t : /3/,\\n        common: function() {\\n          @h.@f.@s().@t;\\n          @h.@f.@s().@t;\\n        }\\n      }\\n    \",d=\"f:first,h:hash,s:second,t:third\".split(\",\");for(var i=0;i<d.length;i++){p=d[i].split(\":\");s=s.replace(new RegExp('@'+p[0]+'([^a-zA-Z0-9_$])','g'),p[1]+'$1');}return s})());"
+    }).should == "eval((function(){var s=\"\\n      var @h = {\\n        @f : '1',\\n        @s: \\\"2\\\",\\n        @t : /3/,\\n        common: function() {\\n          @h.@f.@s().@t;\\n          @h.@f.@s().@t;\\n        }\\n      }\\n    \",d=\"s:second,t:third,f:first,h:hash\".split(\",\");for(var i=0;i<d.length;i++){p=d[i].split(\":\");s=s.replace(new RegExp('@'+p[0],'g'),p[1]);}return s})());"
   end
 end

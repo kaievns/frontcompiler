@@ -21,15 +21,19 @@ class FrontCompiler
       end
       
       def create_build_script(source, names_map)
+        # sorting the tokens in order from the longest key to the shortest one
+        # so they were not conflicting with each other when the script gets reconstructred
+        names_map.sort!{ |a, b| b.split(':').first.size <=> a.split(':').first.size }
+        
         "eval((function(){"+
           "var s=\"#{source.gsub("\\", "\\\\\\\\").gsub("\n", '\\n').gsub('"', '\"').gsub('\\\'', '\\\\\\\\\'')}\","+
           
           # building the replacements data
-          "d=\"#{names_map.collect{ |k, v| "#{k}:#{v}" }.join(',')}\".split(\",\");"+
+          "d=\"#{names_map.join(',')}\".split(\",\");"+
             
           # building the postprocessing script
           "for(var i=0;i<d.length;i++){p=d[i].split(\":\");"+
-            "s=s.replace(new RegExp('#{REPLACEMENTS_PREFIX}'+p[0]+'([^a-zA-Z0-9_$])','g'),p[1]+'$1');}"+
+            "s=s.replace(new RegExp('#{REPLACEMENTS_PREFIX}'+p[0],'g'),p[1]);}"+
           
           "return s"+
         "})());"
@@ -39,9 +43,10 @@ class FrontCompiler
         string = string.dup
         
         names_map = guess_replacements_map(string, tokens_to_replace_in(string))
-        names_map.each do |new_name, old_name|
-          string.gsub! /(\A|[^a-zA-Z0-9_\$])#{old_name}([^a-zA-Z0-9_\$]|\Z)/ do
-            $1 + REPLACEMENTS_PREFIX + new_name + $2
+        names_map.each do |token|
+          new_name, old_name = token.split(':')
+          string.gsub! old_name do
+            REPLACEMENTS_PREFIX + new_name
           end
         end
         
@@ -49,37 +54,64 @@ class FrontCompiler
       end
       
       def tokens_to_replace_in(string)
+        # grabbign the basic list of impact tokens
+        impact_tokens = get_impact_tokens(string, 
+          /(?![^a-z0-9_$])([a-z0-9_$]{#{MINUMUM_REPLACEABLE_TOKEN_SIZE},88})(?![a-z0-9_$])/i)
+        
+        # getting unprocessed sub-tokens list
+        string = string.dup
+        impact_tokens.each{ |token| string.gsub! token.split(':').first, '' }
+        
+        sub_impact_tokens = get_impact_tokens(string, /([A-Z][a-z]{#{MINUMUM_REPLACEABLE_TOKEN_SIZE-1},88})(?![a-z])/)
+        
+        
+        #
+        # NOTE: with the optimisation, the sub-tokens should be on the tokens list
+        #       after the basic tokens, so they were not affecting each other
+        #
+        
+        # the basic dictionary has some space for new tokens, adding some from the sub-tokens list
+        if impact_tokens.size < MAXIMUM_DICTIONARY_SIZE
+          sub_tokens = sub_impact_tokens[0, MAXIMUM_DICTIONARY_SIZE - impact_tokens.size]
+        else
+          # replacing the shortest basic tokens with longest sub-tokens
+          sub_tokens = []
+          while impact_tokens.last && sub_impact_tokens.first && impact_tokens.last.size < sub_impact_tokens.first.size
+            sub_tokens << sub_impact_tokens.shift
+            impact_tokens.pop
+          end
+        end
+        
+        impact_tokens.concat(sub_tokens)
+        
+        # grabbing the single tokens back
+        impact_tokens.collect{|line| line.split(':').first }
+      end
+      
+      #
+      # creates a list of impact-tokens (tokens multiplied to the number of their appearances)
+      #
+      def get_impact_tokens(string, regexp)
         keys = {}
         
-        # getting the list of all the tokens of a good size
-        string.scan(/(?![^a-z0-9_$])([a-z0-9_$]{#{MINUMUM_REPLACEABLE_TOKEN_SIZE},88})(?![a-z0-9_$])/i
-        ).collect(&:last).each do |key|
+        # scanning through the string and calculating the number of appearances
+        string.scan(regexp).collect(&:last).each do |key|
           keys[key] ||= 0
           keys[key] +=  1
         end
         
-        #
-        # filtering by the number of its appearances in the code
-        # we're trying to negotiate the number of tokens to the
-        # maximum length of the dictionary
-        #
-        filtered_keys = nil
-        self.class.minum_number_of_entry_appearances.downto(2) do |maximum_number_of_appearances|
-          prev_filtered_keys = filtered_keys
-          
-          filtered_keys = keys.reject do |key, number|
-            number < maximum_number_of_appearances
-          end
-          
-          if filtered_keys.size > MAXIMUM_DICTIONARY_SIZE
-            filtered_keys = prev_filtered_keys if prev_filtered_keys
-            break
-          end
-        end
-        keys = filtered_keys
+        # kicking of the tokens which appears less then twice
+        keys.reject!{|key,number| number < 2 }
         
-        # converting the list to an array of tokens ordered by the number of appearances
-        keys.collect{|k,v| m={}; m[v] = k; m}.sort{|a,b| b.first <=> a.first}.collect(&:values).collect(&:first)
+        # creating the impact tokens
+        tokens = keys.collect do |token, number|
+          line = []
+          number.times{ line << token }
+          line.join(":")
+        end
+        
+        # sorting the tokens by impact
+        tokens.sort{|a,b| b.size <=> a.size}[0, MAXIMUM_DICTIONARY_SIZE]
       end
       
       #
@@ -87,17 +119,20 @@ class FrontCompiler
       #
       def guess_replacements_map(string, keys)
         replacements = REPLACEMENTS_CHARS + REPLACEMENTS_CHARS.collect{|c| REPLACEMENTS_CHARS.collect{|a| c+a}}.flatten
-        map = {}
+        
+        map = []
+        used_keys = []
         keys.each do |old_name|
           new_name = old_name[/[a-z]/i] || 'a'
           
-          while map.has_key?(new_name) or string.match(/#{REPLACEMENTS_PREFIX}#{new_name}/)
+          while used_keys.include?(new_name) or string.match(/#{REPLACEMENTS_PREFIX}#{new_name}/)
             new_name = replacements.shift
             break if new_name.nil? # <- safety break if no possible match found
           end
           
           if new_name and new_name.size < old_name.size
-            map[new_name] = old_name
+            map << "#{new_name}:#{old_name}"
+            used_keys << new_name
           end
         end
         
@@ -105,26 +140,12 @@ class FrontCompiler
       end
       
     public
-      module ClassMethods
-        def minum_number_of_entry_appearances
-          @@minum_number_of_entry_appearances ||= MINIMUM_NUMBER_OF_APPEARANCES
-        end
-
-        def minum_number_of_entry_appearances=(number)
-          @@minum_number_of_entry_appearances = number
-        end
-      end
-      
-      def self.included(base)
-        base.instance_eval{ extend ClassMethods }
-      end
     
       REPLACEMENTS_PREFIX = '@'
       REPLACEMENTS_CHARS  = ('a'..'z').to_a + ('A'..'Z').to_a
       
       MINUMUM_REPLACEABLE_TOKEN_SIZE = 4
-      MINIMUM_NUMBER_OF_APPEARANCES  = 8
-      MAXIMUM_DICTIONARY_SIZE        = 200
+      MAXIMUM_DICTIONARY_SIZE        = 150
     end
   end 
 end
