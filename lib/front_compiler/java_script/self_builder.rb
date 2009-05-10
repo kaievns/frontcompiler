@@ -130,6 +130,9 @@ class FrontCompiler
             break if new_name.nil? # <- safety break if no possible match found
           end
           
+          # removing the token so the source code was adjusted for the next changes
+          string = string.gsub old_name, "#{REPLACEMENTS_PREFIX}#{new_name}"
+          
           if new_name and new_name.size < old_name.size
             map << "#{new_name}:#{old_name}"
             used_keys << new_name
