@@ -52,7 +52,7 @@ File('public/javascripts/all_in_one.js', 'w') do |file|
     public/javascripts/application.js
   })
 
-  file.write @c.inline(
+  file.write @c.inline_css(
     File.open('public/stylesheets/application.css').read
   )
 end
