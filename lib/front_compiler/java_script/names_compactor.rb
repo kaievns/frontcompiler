@@ -108,7 +108,8 @@ class FrontCompiler
         
         # removing functions calls blocks
         offset = 0
-        while pos = body.index(/\(/, offset)
+        while pos = body.index(/[a-z0-9_]\(/i, offset)
+          pos += 1
           block = find_block("()", pos, body)
           body[pos, block.size] = '' unless body[0, pos].match(/(if|for|while|catch)\s*\Z/im)
           

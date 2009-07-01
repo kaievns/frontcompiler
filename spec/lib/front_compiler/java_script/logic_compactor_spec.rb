@@ -347,4 +347,17 @@ describe FrontCompiler::JavaScript::LogicCompactor do
       }
     }
   end
+  
+  it "should not put missed semicolons in fron of opened lists" do
+    compact(%{
+      var flips = [
+        function() {},
+        function() {}
+      ];
+    }).should == %{
+      var flips = [
+        function() {}, function() {}
+      ];
+    }
+  end
 end

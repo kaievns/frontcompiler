@@ -204,4 +204,16 @@ describe FrontCompiler::JavaScript::NamesCompactor do
       }
     }
   end
+  
+  it "should handle the case when there are two slashes but no regular expression" do
+    compact(%{
+      function(i) {
+        var y = (cell.y/3).floor() * 3 + (i/3).floor();
+      }
+    }).should == %{
+      function(a) {
+        var y = (cell.y/3).floor() * 3 + (a/3).floor();
+      }
+    }
+  end
 end

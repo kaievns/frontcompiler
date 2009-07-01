@@ -47,7 +47,7 @@ protected
   # extends the basic class to excape regular expressions as well
   def string_safely(&block)
     super [
-      /([^\*\\\/])\/[^\*\/][^\n]*?[^\*\n\\](?!\\\/)\// # <- regexps
+      /([\(=:]\s*)\/[^\*\/][^\n]*?[^\*\n\\](?!\\\/)\// # <- regexps
     ], &block
   end
 end

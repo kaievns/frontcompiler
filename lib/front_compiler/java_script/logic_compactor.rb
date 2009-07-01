@@ -123,7 +123,7 @@ class FrontCompiler
     end
     
     def fix_missed_semicolons!
-      gsub! /([^{}()|&;:=,\s])([ \t]*?\n\s*?(return|if|function|while|try|do)[^a-zA-Z_$])/, '\1;\2'
+      gsub! /([^{}()|\[&;:=,\s])([ \t]*?\n\s*?(return|if|function|while|try|do)[^a-zA-Z_$])/, '\1;\2'
       
       # (function(){....})(..) if(...)
       gsub! /(\}\)\([^)]*\))([ \t]*?\n\s*?(return|if|function|while|try|do)[^a-zA-Z_$])/, '\1;\2'
