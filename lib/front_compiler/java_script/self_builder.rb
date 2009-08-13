@@ -21,33 +21,25 @@ class FrontCompiler
       end
       
       def create_build_script(source, names_map)
-        # sorting the tokens in order from the longest key to the shortest one
-        # so they were not conflicting with each other when the script gets reconstructred
-        names_map.sort!{ |a, b| b.split(':').first.size <=> a.split(':').first.size }
-        
-        "eval((function(){"+
-          "var s=\"#{source.gsub("\\", "\\\\\\\\").gsub("\n", '\\n').gsub('"', '\"').gsub('\\\'', '\\\\\\\\\'')}\","+
-          
-          # building the replacements data
-          "d=\"#{names_map.join(',')}\".split(\",\");"+
-            
+        "eval((function(s,d){"+
           # building the postprocessing script
-          "for(var i=0;i<d.length;i++){p=d[i].split(\":\");"+
-            "s=s.replace(new RegExp('#{REPLACEMENTS_PREFIX}'+p[0],'g'),p[1]);}"+
-          
+          "for(var i=d.length-1;i>-1;i--)"+
+            "if(d[i])"+
+              "s=s.replace(new RegExp(i,'g'),d[i]);"+
           "return s"+
-        "})());"
+        "})("+
+          "\"#{source.gsub("\\", "\\\\\\\\").gsub("\n", '\\n').gsub('"', '\"').gsub('\\\'', '\\\\\\\\\'')}\","+
+          "\"#{names_map.join(',')}\".split(\",\")"+
+        "));"
       end
       
       def compact_hashes_in(string)
         string = string.dup
         
         names_map = guess_replacements_map(string, tokens_to_replace_in(string))
-        names_map.each do |token|
-          new_name, old_name = token.split(':')
-          string.gsub! old_name do
-            REPLACEMENTS_PREFIX + new_name
-          end
+        
+        names_map.each_with_index do |token, i|
+          string.gsub! token, "#{i}" if token != ''
         end
         
         [string, names_map]
@@ -118,25 +110,19 @@ class FrontCompiler
       # Generic replacements quessing method
       #
       def guess_replacements_map(string, keys)
-        replacements = REPLACEMENTS_CHARS + REPLACEMENTS_CHARS.collect{|c| REPLACEMENTS_CHARS.collect{|a| c+a}}.flatten
-        
         map = []
-        used_keys = []
+        index = -1
         keys.each do |old_name|
-          new_name = old_name[/[a-z]/i] || 'a'
+          index += 1
           
-          while used_keys.include?(new_name) or string.match(/#{REPLACEMENTS_PREFIX}#{new_name}/)
-            new_name = replacements.shift
-            break if new_name.nil? # <- safety break if no possible match found
+          while string.match(/#{index}/)
+            map << ''
+            index+= 1
           end
           
-          # removing the token so the source code was adjusted for the next changes
-          string = string.gsub old_name, "#{REPLACEMENTS_PREFIX}#{new_name}"
+          map << old_name
           
-          if new_name and new_name.size < old_name.size
-            map << "#{new_name}:#{old_name}"
-            used_keys << new_name
-          end
+          string = string.gsub old_name, "#{index}"
         end
         
         map
@@ -144,10 +130,7 @@ class FrontCompiler
       
     public
     
-      REPLACEMENTS_PREFIX = '@'
-      REPLACEMENTS_CHARS  = ('a'..'z').to_a + ('A'..'Z').to_a
-      
-      MINUMUM_REPLACEABLE_TOKEN_SIZE = 4
+      MINUMUM_REPLACEABLE_TOKEN_SIZE = 3
       MAXIMUM_DICTIONARY_SIZE        = 150
     end
   end 

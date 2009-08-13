@@ -45,26 +45,26 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var @h = {
-        @f:  1,
-        @s: 2,
-        @t:  3,
-        @c: {
-          @f:  1,
-          @s: 2,
-          @t:  3,
-          @c: {
-            @f : 1,
-            @s: 2,
-            @t : 3,
-            @c: {
-              @f : 1,
-              @s: 2,
-              @t : 3,
-              @c: function() {
-                var a = @h.@f.@s.@t.@c();
-                var a = @h.@f.@s.@t.@c();
-                var b = @h.@f@s.@t@c();
+      8 7 = {
+        5:  1,
+        0: 2,
+        4:  3,
+        6: {
+          5:  1,
+          0: 2,
+          4:  3,
+          6: {
+            5 : 1,
+            0: 2,
+            4 : 3,
+            6: {
+              5 : 1,
+              0: 2,
+              4 : 3,
+              6: function() {
+                8 a = 7.5.0.4.6();
+                8 a = 7.5.0.4.6();
+                8 b = 7.50.46();
               }
             }
           }
@@ -88,15 +88,15 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var @h = {
+      var 4 = {
         a: 1,
         b: 2,
         c: {
-          @a: {},
-          @b: {},
-          @c: function() {
-            @h.a.b.c.@a().@b.@c();
-            @h.a.b.c.@a().@b.@c();
+          3: {},
+          5: {},
+          0: function() {
+            4.a.b.c.3().5.0();
+            4.a.b.c.3().5.0();
           }
         }
       }
@@ -115,13 +115,13 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var @h = {
-        @f : 1,
-        @s: 2,
-        @t : function() {
-          var @h = @h.f.s.t();
-          var @h = @h.@f.@s.@t();
-          var @h = @h.@f.@s.@t();
+      6 0 = {
+        5 : 1,
+        3: 2,
+        4 : function() {
+          6 0 = 0.f.s.t();
+          6 0 = 0.5.3.4();
+          6 0 = 0.5.3.4();
         }
       }
     }
@@ -138,12 +138,12 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       }
     }).should == %{
-      var @h = {
-        @c: 1,
-        @b: 2,
-        @a: function() {
-          var @c = @h.@c.@b().@a;
-          var @c = @h.@c.@b().@a;
+      6 5 = {
+        0: 1,
+        4: 2,
+        3: function() {
+          6 0 = 5.0.4().3;
+          6 0 = 5.0.4().3;
         }
       }
     }
@@ -184,16 +184,16 @@ describe FrontCompiler::JavaScript::SelfBuilder do
         }
       };
     }).should == %{
-      var @f = @f() {
-        @s () {
-          @w () {
+      3 0 = 0() {
+        1 () {
+          2 () {
             do();
           }
         }
       };
-      var @f = @f name() {
-        @s () {
-          @w () {
+      3 0 = 0 name() {
+        1 () {
+          2 () {
             do();
           }
         }
@@ -214,8 +214,8 @@ describe FrontCompiler::JavaScript::SelfBuilder do
       return bla;
       return bla;
     }).should == %{
-      @r bla;
-      @r bla;
+      0 1;
+      0 1;
     }
   end
   
@@ -232,8 +232,8 @@ describe FrontCompiler::JavaScript::SelfBuilder do
       Object.bla;
       Object.bla;
     }).should == %{
-      @O.bla;
-      @O.bla;
+      0.1;
+      0.1;
     }
   end
   
@@ -248,6 +248,6 @@ describe FrontCompiler::JavaScript::SelfBuilder do
           hash.first.second().third;
         }
       }
-    }).should == "eval((function(){var s=\"\\n      var @h = {\\n        @f : '1',\\n        @s: \\\"2\\\",\\n        @t : /3/,\\n        common: function() {\\n          @h.@f.@s().@t;\\n          @h.@f.@s().@t;\\n        }\\n      }\\n    \",d=\"s:second,t:third,f:first,h:hash\".split(\",\");for(var i=0;i<d.length;i++){p=d[i].split(\":\");s=s.replace(new RegExp('@'+p[0],'g'),p[1]);}return s})());"
+    }).should == "eval((function(s,d){for(var i=d.length-1;i>-1;i--)if(d[i])s=s.replace(new RegExp(i,'g'),d[i]);return s})(\"\\n      var 6 = {\\n        5 : '1',\\n        0: \\\"2\\\",\\n        4 : /3/,\\n        common: function() {\\n          6.5.0().4;\\n          6.5.0().4;\\n        }\\n      }\\n    \",\"second,,,,third,first,hash\".split(\",\")));"
   end
 end
