@@ -11,8 +11,22 @@ for your code, see the description below.
 The library can be used as a plugin for rails. See description below.
 
 
-Usage
-=====
+RubyGem and Console tool
+========================
+
+FrontCompiler is now available as a rubygem at the gemcutter service
+
+gem sources -a http://gemcutter.org
+gem install front-compiler
+
+With the rubygem you'll have a console tool called 'frontcc'
+
+$ frontcc file0.js file1.js file2.js file3.js
+
+
+
+Basic Usage
+===========
 
 It's pretty simple
 

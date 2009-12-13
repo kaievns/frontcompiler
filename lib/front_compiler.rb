@@ -6,7 +6,7 @@
 $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__))).uniq!
 
 class FrontCompiler
-  VERSION = "0.1"
+  VERSION = "1.0.6"
   
   def initialize
     @html_compactor = HTMLCompactor.new

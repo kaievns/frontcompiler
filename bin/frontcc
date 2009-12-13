@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift(File.expand_path(File.join(File.dirname(__FILE__),'..','lib')))
+
+require 'front_compiler'
+
+if ARGV.empty? || ARGV.include?('-h') || ARGV.include?('--help')
+  puts %Q{FrontCompiler the Ruby based JavaScript/CSS/HTML compiler
+(C) 2008-2009 Nikolay Nemshilov
+
+
+frontcc [options] file file file ...
+
+options:
+  -h    Show this help
+  -p    Create an albeit packed script
+
+
+The command supports any standard console */* selectors
+and will automatically recognize file-types by extensions
+}
+else
+  cc = FrontCompiler.new
+  
+  javascript = false
+  
+  # creating an overall source
+  source = ARGV.collect{ |path| Dir[path] }.flatten.collect do |path|
+    if File.exists? path
+      src = File.open(path, 'r').read
+      
+      case path.split('.').last.downcase
+        when "html"
+          throw "We don't inline HTML into JavaScript" if javascript
+          cc.compact_html(src)
+        when "css"
+          cc.send(javascript ? :inline_css : :compact_css, src)
+        when "js"
+          javascript = true
+          src =~ /;\s*\Z/ ? src : (src + ';') # <- checking the end semicolon
+          
+        else
+          throw "Unsupported kind of file '#{path}'"
+      end
+    end
+  end.compact.join("")
+  
+  if javascript
+    source = cc.compact_js(source)
+    source = source.create_self_build if ARGV.include?('-p')
+  end
+  
+  puts source
+end

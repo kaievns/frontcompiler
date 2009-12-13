@@ -8,3 +8,4 @@ spec/temp/*
 nbproject
 build/in/*
 build/out/*
+*.gem
