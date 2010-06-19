@@ -67,4 +67,19 @@ describe FrontCompiler::JavaScript do
       var str = 'asdfasdfasdfa"sdfasdf';
     }
   end
+  
+  it "should optimize the typeof() calls in javascript" do
+    js(%Q{
+      var t = typeof(something);
+      if (typeof(something) == "boo")
+        boo();
+      else if (typeof something == "hoo")
+        hoo();
+    }).remove_trailing_spaces!.should == "" \
+      'var t=typeof something;' \
+      'if(typeof something=="boo")' \
+        'boo();' \
+      'else if(typeof something=="hoo")' \
+        'hoo();'
+  end
 end
