@@ -28,6 +28,7 @@ class FrontCompiler::CssSource < FrontCompiler::SourceCode
       gsub!(/\s+/im, ' ')
       gsub!(/\s*(\+|>|\||~|\{|\}|,|\)|\(|;|:|\*)\s*/im, '\1')
       gsub!(/;\}/, '}')
+      gsub!(/\)([^;}\s])/, ') \1')
       strip!
     end
   end

@@ -108,4 +108,12 @@ describe FrontCompiler::CssSource do
         'div,p{padding:10pt;background:url(\\"something\\");content:\"something\"}' \
       '</style>");'
   end
+  
+  it "should keep the no-repeat option with a space in front" do
+    css(%{
+      div {
+        background: url("boo.hoo") no-repeat 0 0 scroll #fff;
+      }
+    }).compact!.should == 'div{background:url("boo.hoo") no-repeat 0 0 scroll #fff}'
+  end
 end
