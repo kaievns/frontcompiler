@@ -23,13 +23,13 @@ describe FrontCompiler::JavaScript do
     js(%{
       
       var str1 = "asdfsdf \\n\\n\\n asd";
-      var str2 = 'asdfasdf';
+      var str2 = "asdfasdf";
 
 
 
     }).remove_empty_lines!.should == %{
       var str1 = "asdfsdf \\n\\n\\n asd";
-      var str2 = 'asdfasdf';
+      var str2 = "asdfasdf";
     }
   end
   
@@ -50,11 +50,21 @@ describe FrontCompiler::JavaScript do
     js(%{
       var str = "asdf \\\\ \\n /* asdf */";
       var str = /\\D/;
-      var str = '\\D';
+      var str = "\\D";
     }).remove_comments!.should == %{
       var str = "asdf \\\\ \\n /* asdf */";
       var str = /\\D/;
-      var str = '\\D';
+      var str = "\\D";
+    }
+  end
+  
+  it "should convert single quotes to doubles in simple cases" do 
+    js(%{
+      var str = 'asdfasdfdsaf';
+      var str = 'asdfasdfasdfa"sdfasdf';
+    }).remove_comments!.should == %{
+      var str = "asdfasdfdsaf";
+      var str = 'asdfasdfasdfa"sdfasdf';
     }
   end
 end

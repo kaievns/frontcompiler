@@ -32,7 +32,7 @@ describe FrontCompiler::CssSource do
       }
 
       a:after {
-        content: '/* */';
+        content: "/* */";
       }
     }
   end
@@ -81,9 +81,9 @@ describe FrontCompiler::CssSource do
       form p label { 
         display: block;
       }
-    }).remove_trailing_spaces!.should == ""\
-    "html,body{cusor:pointer;color:red}div>p~label:after{"\
-    "content:'           ';text-decoration:underline}"\
+    }).remove_trailing_spaces!.should == "" \
+    "html,body{cusor:pointer;color:red}div>p~label:after{" \
+    "content:\"           \";text-decoration:underline}" \
     "form p label{display:block}"
   end
   
@@ -104,8 +104,8 @@ describe FrontCompiler::CssSource do
         content: "something";
      }
     }).to_javascript.should == 
-      'document.write("<style type=\\"text/css\\">'+
-        'div,p{padding:10pt;background:url(\'something\');content:\"something\"}'+
+      'document.write("<style type=\\"text/css\\">' \
+        'div,p{padding:10pt;background:url(\\"something\\");content:\"something\"}' \
       '</style>");'
   end
 end

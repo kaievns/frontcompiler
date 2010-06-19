@@ -66,7 +66,12 @@ protected
     
     # bgingin the strings back
     outtakes.reverse.each do |s|
-      gsub! s[:replacement], s[:original].gsub('\\','\\\\\\\\') # <- escapes reescaping
+      original = s[:original]
+      
+      # converting quotes into 
+      original.gsub! "'", '"' if /\A'[^'"]+'\Z/ =~ original
+      
+      gsub! s[:replacement], original.gsub('\\','\\\\\\\\') # <- escapes reescaping
     end
     @in_string_safe_mode = false
     
