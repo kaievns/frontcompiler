@@ -1,3 +1,7 @@
+* 1.1.0 (June 20, 2010) - Nikolay Nemshilov
+  * Better local names compactor
+  * CSS compactor fix
+
 * 1.0.6 (December 14, 2009) - Nikolay V. Nemshilov aka St.
   * rubygem is now available
   * console util was added
