@@ -13,10 +13,10 @@ class FrontCompiler::JavaScript < FrontCompiler::SourceCode
   def compact!
     string_safely do 
       remove_comments!.
-#        compact_logic!.
+        compact_logic!.
         compact_names!.
-        remove_empty_lines!
-#        remove_trailing_spaces!
+        remove_empty_lines!.
+        remove_trailing_spaces!
     end
   end
   
