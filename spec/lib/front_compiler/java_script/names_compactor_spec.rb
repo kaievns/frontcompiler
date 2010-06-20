@@ -346,4 +346,18 @@ describe FrontCompiler::JavaScript::NamesCompactor do
       }
     }
   end
+  
+  it "should not screw with external variable in a case like that" do
+    compact(%{
+      function() {
+        for (var i=0, natives = [Array, Function, Number, String, Date, RegExp]; i < natives.length; i++) {
+        }
+      }
+    }).should == %{
+      function() {
+        for (var i=0, n = [Array, Function, Number, String, Date, RegExp]; i < n.length; i++) {
+        }
+      }
+    }
+  end
 end

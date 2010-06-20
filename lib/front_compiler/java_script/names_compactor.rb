@@ -137,7 +137,6 @@ class FrontCompiler
           ['[]', '{}'].each do |token|
             offset = 0
             while pos = line.index(token=='[]' ? /\[.*?\]/ : /\{.*?\}/, offset)
-              pos += 1
               block = find_block(token, pos, line)
               line[pos, block.size] = ''
               
@@ -145,9 +144,7 @@ class FrontCompiler
             end
           end
           
-          
           # removing objects definitions
-          
           names.concat(line.split(",").collect{ |token|
               token[/[\w\d_\$]+/i]
             }.compact)

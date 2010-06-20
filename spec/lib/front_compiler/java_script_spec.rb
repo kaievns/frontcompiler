@@ -75,11 +75,26 @@ describe FrontCompiler::JavaScript do
         boo();
       else if (typeof something == "hoo")
         hoo();
+        
+      switch (typeof(something)) {
+        case "boo": hoo();
+      }
+      
+      switch (typeof something) {
+        case "boo": hoo();
+      }
+        
+      return typeof(value) !== "undefined" &&
+        typeof(value.hasOwnProperty) !== "undefined"
     }).remove_trailing_spaces!.should == "" \
       'var t=typeof something;' \
       'if(typeof something=="boo")' \
         'boo();' \
       'else if(typeof something=="hoo")' \
-        'hoo();'
+        'hoo();' \
+      'switch(typeof something){case "boo":hoo()}' \
+      'switch(typeof something){case "boo":hoo()}' \
+      'return typeof value!=="undefined"&&' \
+        'typeof value.hasOwnProperty!=="undefined"'
   end
 end

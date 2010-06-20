@@ -38,7 +38,7 @@ class FrontCompiler::JavaScript < FrontCompiler::SourceCode
       gsub!(/\s+/im, ' ') # cutting down all spaces to the minimum
       gsub!(/\s*(=|\+|\-|<|>|\?|\|\||&&|\!|\{|\}|,|\)|\(|;|\]|\[|:|\*|\/)\s*/im, '\1')
       gsub!(/;(\})/, '\1') # removing unnecessary semicolons
-      gsub!(/([^a-z\d_\$]typeof)(\s+|\()([a-z\d\$_]+)(\))?\s*/im, '\1 \3') # converting the typeof calls
+      gsub!(/([^a-z\d_\$]typeof)\(([^\)]+)\)\s*/im, '\1 \2') # converting the typeof calls
       strip!
     end
   end
