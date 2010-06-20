@@ -75,11 +75,12 @@ class FrontCompiler
         names_map = { }
         used_renames = []
         
-        @replacements ||= ('a'...'z').to_a.concat(('A'...'Z').to_a)
-#          concat(('aa'...'zz').to_a).
-#          concat(('a'...'z').collect{ |c| ('A'...'Z').collect{|n| c + n}}.flatten.
-#          concat(('A'...'Z').collect{|c| ('a'...'z').collect{|n| c+ n}})).flatten  .
-#          concat(('AA'...'ZZ').to_a)
+        @replacements ||= ('a'...'z').to_a.
+          concat(('A'...'Z').to_a).
+          concat(('aa'...'zz').to_a).
+          concat(('a'...'z').collect{ |c| ('A'...'Z').collect{|n| c + n}}.flatten).
+          concat(('A'...'Z').collect{ |c| ('a'...'z').collect{|n| c + n}}.flatten).
+          concat(('AA'...'ZZ').to_a)
         
         names.each do |name|
           [name[/[a-z]/i]||'a'].concat(@replacements).each do |rename|

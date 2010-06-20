@@ -252,4 +252,66 @@ describe FrontCompiler::JavaScript::NamesCompactor do
       }
     }
   end
+  
+  it "should process multilined variables with cross-calls" do
+    compact(%{
+      function() {
+        var boo = "boo", hoo = {
+          moo: boo,
+          doo: {
+            zoo: boo
+          }
+        }
+      }
+    }).should == %{
+      function() {
+        var b = "boo", h = {
+          moo: b,
+          doo: {
+            zoo: b
+          }
+        }
+      }
+    }
+  end
+  
+  it "should process several variable definitions in a mixed situation" do
+    compact(%{
+      function() {
+        var boo = "boo", hoo = "hoo";
+        
+        function () {
+          return boo + hoo + moo + noo();
+        }
+        
+        var moo = "moo",
+            zoo = "zoo",
+            doo = "doo";
+            
+        function noo() {
+          return boo + hoo + zoo;
+        }
+        
+        return boo + hoo + zoo + doo;
+      }
+    }).should == %{
+      function() {
+        var b = "boo", h = "hoo";
+        
+        function () {
+          return b + h + m + n();
+        }
+        
+        var m = "moo",
+            z = "zoo",
+            d = "doo";
+            
+        function n() {
+          return b + h + z;
+        }
+        
+        return b + h + z + d;
+      }
+    }
+  end
 end
