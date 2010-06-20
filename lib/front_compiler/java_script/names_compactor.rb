@@ -72,9 +72,7 @@ class FrontCompiler
       
       # makes decisions about the names cutting down
       def guess_names_map(body, names)
-        names_map = { }
-        used_renames = []
-        
+        # collecting a list of short var names
         @replacements ||= ('a'...'z').to_a.
           concat(('A'...'Z').to_a).
           concat(('aa'...'zz').to_a).
@@ -82,6 +80,15 @@ class FrontCompiler
           concat(('A'...'Z').collect{ |c| ('a'...'z').collect{|n| c + n}}.flatten).
           concat(('AA'...'ZZ').to_a)
         
+        # sorting the names by their impact on the size
+        names_impact = get_names_impact_map(body, names)
+        names.sort! do |a, b|
+          names_impact[b] <=> names_impact[a]
+        end
+        
+        # finding the new variable names
+        names_map = { }
+        used_renames = []
         names.each do |name|
           [name[/[a-z]/i]||'a'].concat(@replacements).each do |rename|
             if !used_renames.include?(rename) and !body.match(/[^\w\d_\.\$]#{rename}[^\w\d_\$]/)
@@ -147,6 +154,17 @@ class FrontCompiler
         end
         
         names
+      end
+      
+      # builds the map of names size impact on the body
+      def get_names_impact_map(body, names)
+        impact_map = {}
+        
+        names.each do |name|
+          impact_map[name] = body.scan(/[^\w\d_\.\$]#{name}[^\w\d_\$]/).size
+        end
+        
+        impact_map
       end
     end
   end

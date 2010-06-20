@@ -166,13 +166,13 @@ describe FrontCompiler::JavaScript::NamesCompactor do
       }
     }).should == %{
       function(b) {
-        function c() {
+        function a() {
           function f() {
             var m = b * 2;
             b(m);
           }
         }
-        var a = c(b);
+        var c = a(b);
       }
     }
   end
@@ -311,6 +311,38 @@ describe FrontCompiler::JavaScript::NamesCompactor do
         }
         
         return b + h + z + d;
+      }
+    }
+  end
+  
+  it "should negotiate the var names pushing the better optimizations upper" do
+    compact(%{
+      function() {
+        var a, b, c, d;
+        
+        var aaron = 'aaron',
+            bobby = 'bobby',
+            carry = 'carry',
+            dicky = 'dicky';
+        
+        return aaron +
+               bobby + bobby +
+               carry + carry + carry +
+               dicky + dicky + dicky + dicky;
+      }
+    }).should == %{
+      function() {
+        var a, b, c, d;
+        
+        var h = "aaron",
+            g = "bobby",
+            f = "carry",
+            e = "dicky";
+        
+        return h +
+               g + g +
+               f + f + f +
+               e + e + e + e;
       }
     }
   end
