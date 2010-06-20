@@ -4,7 +4,7 @@
 # This module is a part of the JavaScript class and taken out
 # just to keep the things simple
 # 
-# Copyright (C) Nikolay V. Nemshilov aka St.
+# Copyright (C) 2008-2010 Nikolay Nemshilov
 #
 class FrontCompiler
   class JavaScript < FrontCompiler::SourceCode
@@ -24,6 +24,7 @@ class FrontCompiler
           ([a-z\d\\$\s_,]*)   # arguments list
           \)\s*               # end of the function definition
       }imx
+      
       def compact_names_of(src)
         offset = 0
         while pos = src.index(FUNCTION_START_RE, offset)
@@ -75,6 +76,10 @@ class FrontCompiler
         used_renames = []
         
         @replacements ||= ('a'...'z').to_a.concat(('A'...'Z').to_a)
+#          concat(('aa'...'zz').to_a).
+#          concat(('a'...'z').collect{ |c| ('A'...'Z').collect{|n| c + n}}.flatten.
+#          concat(('A'...'Z').collect{|c| ('a'...'z').collect{|n| c+ n}})).flatten  .
+#          concat(('AA'...'ZZ').to_a)
         
         names.each do |name|
           [name[/[a-z]/i]||'a'].concat(@replacements).each do |rename|
@@ -117,13 +122,18 @@ class FrontCompiler
         end
         
         # getting the vars definitions
-        body.scan(/[\s\(:;=\{\[^$]+var\s(.*?)(;|$)/im) do |match|
+        body.scan(/[\s\(:;=\{\[^$]+var\s(.*?)(;|\Z)/im) do |match|
           line = $1.dup
           
           # removing arrays and objects definitions out of the line
           ['[]', '{}'].each do |token|
-            while pos = line.index(token=='[]' ? /\[.*?\]/ : /\{.*?\}/)
-              line[pos, $&.size] = ''
+            offset = 0
+            while pos = line.index(token=='[]' ? /\[.*?\]/ : /\{.*?\}/, offset)
+              pos += 1
+              block = find_block(token, pos, line)
+              line[pos, block.size] = ''
+              
+              offset = pos + 1
             end
           end
           

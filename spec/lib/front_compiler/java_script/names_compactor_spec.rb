@@ -216,4 +216,40 @@ describe FrontCompiler::JavaScript::NamesCompactor do
       }
     }
   end
+  
+  it "should process the multi-lined variable definitions with complex constructions in them" do
+    compact(%{
+      function() {
+        var boo = [],
+            hoo = {
+              doo: [[1], [2], [3], {
+                moo: {
+                  zoo: [[[[[1]]]]]
+                }
+              }]
+            },
+            foo = function() {
+              
+            };
+            
+        foo(boo, hoo);
+      }
+    }).should == %{
+      function() {
+        var b = [],
+            h = {
+              doo: [[1], [2], [3], {
+                moo: {
+                  zoo: [[[[[1]]]]]
+                }
+              }]
+            },
+            f = function() {
+              
+            };
+            
+        f(b, h);
+      }
+    }
+  end
 end
